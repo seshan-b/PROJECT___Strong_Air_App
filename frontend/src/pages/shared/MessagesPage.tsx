@@ -16,7 +16,7 @@ const MessagesPage: React.FC<MessagesPageProps> = ({ currentUser }) => {
   const [newForm, setNewForm] = useState({ subject: '', body: '', recipient_ids: [] as number[] });
   const [users, setUsers] = useState<User[]>([]);
 
-  const isAdmin = currentUser.role === 'superadmin' || currentUser.role === 'admin';
+  const isAdmin = currentUser.role === 'superadmin';
 
   const fetchThreads = async () => {
     try {

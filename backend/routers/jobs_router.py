@@ -11,7 +11,7 @@ from typing import List
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
 
-@router.get("/", response_model=List[JobResponse])
+@router.get("", response_model=List[JobResponse])
 async def list_jobs(
     status: str = None,
     db: AsyncSession = Depends(get_db),
@@ -46,11 +46,11 @@ async def list_jobs(
     return response
 
 
-@router.post("/", response_model=JobResponse)
+@router.post("", response_model=JobResponse)
 async def create_job(
     req: JobCreateRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     job = Job(title=req.title, description=req.description, image_url=req.image_url)
     db.add(job)
@@ -97,7 +97,7 @@ async def update_job(
     job_id: int,
     req: JobUpdateRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     result = await db.execute(select(Job).where(Job.id == job_id))
     job = result.scalar_one_or_none()
@@ -129,7 +129,7 @@ async def assign_users(
     job_id: int,
     req: AssignmentRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     result = await db.execute(select(Job).where(Job.id == job_id))
     if not result.scalar_one_or_none():
@@ -164,7 +164,7 @@ async def unassign_user(
     job_id: int,
     user_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     result = await db.execute(
         select(JobAssignment).where(

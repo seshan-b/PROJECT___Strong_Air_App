@@ -11,9 +11,8 @@ Build a production-ready MVP web application called Strong Air - a workforce man
 - **Deployment**: Docker Compose + Nginx (reference configs included)
 
 ## User Personas
-1. **Super Admin**: Full system control, manage admin accounts
-2. **Admin/Site Manager**: Approve users, manage jobs, view analytics, messaging
-3. **Worker**: View assigned jobs, clock in/out, view hours, messaging, profile
+1. **Super Admin**: Full system control — manage users, jobs, analytics, messaging
+2. **Worker**: View assigned jobs, clock in/out, view hours, messaging, profile
 
 ## Core Requirements
 - [x] User registration with admin approval (pending → verified)

@@ -3,19 +3,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database import get_db
 from models import User, UserRole, UserStatus
-from schemas import UserResponse, UserUpdateRequest, ApproveUserRequest, CreateAdminRequest
+from schemas import UserResponse, UserUpdateRequest, ApproveUserRequest
 from auth import get_current_user, require_role, hash_password
 from typing import List
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 
-@router.get("/", response_model=List[UserResponse])
+@router.get("", response_model=List[UserResponse])
 async def list_users(
     status: str = None,
     role: str = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     query = select(User)
     if status:
@@ -30,7 +30,7 @@ async def list_users(
 @router.get("/pending", response_model=List[UserResponse])
 async def list_pending_users(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     result = await db.execute(
         select(User).where(User.status == UserStatus.pending).order_by(User.created_at.desc())
@@ -43,7 +43,7 @@ async def approve_user(
     user_id: int,
     req: ApproveUserRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
@@ -81,7 +81,7 @@ async def update_profile(
 async def get_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
@@ -103,30 +103,3 @@ async def delete_user(
     await db.delete(user)
     await db.commit()
     return {"detail": "User deleted"}
-
-
-@router.post("/admin", response_model=UserResponse)
-async def create_admin(
-    req: CreateAdminRequest,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin)),
-):
-    existing = await db.execute(select(User).where(User.email == req.email))
-    if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Email already registered")
-    existing = await db.execute(select(User).where(User.username == req.username))
-    if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Username already taken")
-    user = User(
-        name=req.name,
-        email=req.email,
-        phone=req.phone,
-        username=req.username,
-        password_hash=hash_password(req.password),
-        role=UserRole.admin,
-        status=UserStatus.verified,
-    )
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
-    return user

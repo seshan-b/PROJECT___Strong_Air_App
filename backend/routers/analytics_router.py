@@ -15,7 +15,7 @@ async def hours_by_user(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     query = (
         select(
@@ -48,7 +48,7 @@ async def hours_by_job(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     query = (
         select(
@@ -81,7 +81,7 @@ async def hours_over_time(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     query = (
         select(
@@ -109,7 +109,7 @@ async def hours_over_time(
 @router.get("/summary")
 async def dashboard_summary(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     # Total hours
     total_result = await db.execute(

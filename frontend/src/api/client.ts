@@ -68,8 +68,6 @@ export const usersApi = {
     api.patch<User>('/api/users/me', data),
   get: (userId: number) => api.get<User>(`/api/users/${userId}`),
   delete: (userId: number) => api.delete(`/api/users/${userId}`),
-  createAdmin: (data: { name: string; email: string; username: string; password: string; phone?: string }) =>
-    api.post<User>('/api/users/admin', data),
 };
 
 // Jobs

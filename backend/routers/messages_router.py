@@ -17,7 +17,7 @@ async def list_threads(
     current_user: User = Depends(get_current_user),
 ):
     # Get threads where user is a recipient or creator
-    if current_user.role in [UserRole.superadmin, UserRole.admin]:
+    if current_user.role in [UserRole.superadmin]:
         # Admins see threads they created
         result = await db.execute(
             select(MessageThread)

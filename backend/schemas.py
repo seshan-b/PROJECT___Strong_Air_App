@@ -54,14 +54,6 @@ class ApproveUserRequest(BaseModel):
     status: str  # verified or suspended
 
 
-class CreateAdminRequest(BaseModel):
-    name: str = Field(..., min_length=1)
-    email: str = Field(..., min_length=1)
-    username: str = Field(..., min_length=3)
-    password: str = Field(..., min_length=6)
-    phone: Optional[str] = None
-
-
 # ── Jobs ──
 class JobCreateRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
