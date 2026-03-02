@@ -256,11 +256,11 @@ class StrongAirAPITester:
             print("❌ Skipping users API - no admin token")
             return False
         
-        # Test GET /api/users
+        # Test GET /api/users/ (with trailing slash)
         success, response = self.run_test(
             "List Users",
             "GET",
-            "api/users",
+            "api/users/",
             200,
             token=self.admin_token
         )
