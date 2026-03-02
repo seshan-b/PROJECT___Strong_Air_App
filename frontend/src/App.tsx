@@ -44,7 +44,7 @@ const App: React.FC = () => {
     );
   }
 
-  const isAdmin = user && (user.role === 'superadmin' || user.role === 'admin');
+  const isAdmin = user && (user.role === 'superadmin');
   const isWorker = user && user.role === 'user';
 
   return (
