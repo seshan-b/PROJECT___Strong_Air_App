@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { usersApi } from '../../api/client';
-import { UserPlus, Check, X, Shield, Search } from 'lucide-react';
+import { Check, X, Search } from 'lucide-react';
 import type { User } from '../../types';
 
 const AdminUsersPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'verified' | 'suspended'>('all');
   const [search, setSearch] = useState('');
-  const [showCreateAdmin, setShowCreateAdmin] = useState(false);
-  const [adminForm, setAdminForm] = useState({ name: '', email: '', username: '', password: '', phone: '' });
-  const [loading, setLoading] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -26,18 +23,6 @@ const AdminUsersPage: React.FC = () => {
       await usersApi.approve(userId, status);
       fetchUsers();
     } catch (err) { console.error(err); }
-  };
-
-  const handleCreateAdmin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await usersApi.createAdmin(adminForm);
-      setShowCreateAdmin(false);
-      setAdminForm({ name: '', email: '', username: '', password: '', phone: '' });
-      fetchUsers();
-    } catch (err) { console.error(err); }
-    setLoading(false);
   };
 
   const filtered = users.filter(u =>
@@ -57,10 +42,14 @@ const AdminUsersPage: React.FC = () => {
   const roleBadge = (role: string) => {
     const styles: Record<string, string> = {
       superadmin: 'bg-purple-100 text-purple-800 border-purple-200',
-      admin: 'bg-primary-100 text-primary-800 border-primary-200',
       user: 'bg-primary-50 text-primary-600 border-primary-100',
     };
     return `inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium border ${styles[role] || ''}`;
+  };
+
+  const roleLabel = (role: string) => {
+    if (role === 'superadmin') return 'Super Admin';
+    return 'Worker';
   };
 
   return (
@@ -68,15 +57,8 @@ const AdminUsersPage: React.FC = () => {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-heading font-bold text-2xl text-primary-900">User Management</h1>
-          <p className="text-primary-500 text-sm mt-1">Manage workers and admin accounts</p>
+          <p className="text-primary-500 text-sm mt-1">Manage and approve worker accounts</p>
         </div>
-        <button
-          data-testid="create-admin-button"
-          onClick={() => setShowCreateAdmin(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-900 text-white rounded-md text-sm font-medium hover:bg-primary-800 transition-colors"
-        >
-          <UserPlus size={16} /> Create Admin
-        </button>
       </div>
 
       {/* Filters */}
@@ -130,7 +112,7 @@ const AdminUsersPage: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-primary-600">{user.email}</td>
-                <td className="px-6 py-4"><span className={roleBadge(user.role)}>{user.role}</span></td>
+                <td className="px-6 py-4"><span className={roleBadge(user.role)}>{roleLabel(user.role)}</span></td>
                 <td className="px-6 py-4"><span className={statusBadge(user.status)}>{user.status}</span></td>
                 <td className="px-6 py-4">
                   {user.status === 'pending' && (
@@ -180,28 +162,6 @@ const AdminUsersPage: React.FC = () => {
           </tbody>
         </table>
       </div>
-
-      {/* Create Admin Modal */}
-      {showCreateAdmin && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="create-admin-modal">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md animate-fade-in">
-            <div className="flex items-center gap-2 mb-6">
-              <Shield size={20} className="text-accent" />
-              <h3 className="font-heading font-semibold text-lg text-primary-900">Create Admin Account</h3>
-            </div>
-            <form onSubmit={handleCreateAdmin} className="space-y-4">
-              <input data-testid="admin-name-input" type="text" placeholder="Full Name" value={adminForm.name} onChange={(e) => setAdminForm(p => ({ ...p, name: e.target.value }))} className="w-full h-10 px-4 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent" required />
-              <input data-testid="admin-email-input" type="email" placeholder="Email" value={adminForm.email} onChange={(e) => setAdminForm(p => ({ ...p, email: e.target.value }))} className="w-full h-10 px-4 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent" required />
-              <input data-testid="admin-username-input" type="text" placeholder="Username" value={adminForm.username} onChange={(e) => setAdminForm(p => ({ ...p, username: e.target.value }))} className="w-full h-10 px-4 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent" required />
-              <input data-testid="admin-password-input" type="password" placeholder="Password" value={adminForm.password} onChange={(e) => setAdminForm(p => ({ ...p, password: e.target.value }))} className="w-full h-10 px-4 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent" required minLength={6} />
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowCreateAdmin(false)} className="flex-1 h-10 border border-primary-200 text-primary-700 rounded-md text-sm font-medium hover:bg-primary-50">Cancel</button>
-                <button data-testid="admin-submit-button" type="submit" disabled={loading} className="flex-1 h-10 bg-primary-900 text-white rounded-md text-sm font-medium hover:bg-primary-800 disabled:opacity-50">Create</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
