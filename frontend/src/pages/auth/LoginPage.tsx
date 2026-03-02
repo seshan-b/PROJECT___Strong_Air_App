@@ -2,8 +2,13 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/client';
 import { HardHat, Eye, EyeOff } from 'lucide-react';
+import type { User } from '../../types';
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  onLoginSuccess?: (user: User) => void;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
