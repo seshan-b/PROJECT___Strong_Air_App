@@ -66,8 +66,12 @@ async def refresh_token(req: RefreshRequest, db: AsyncSession = Depends(get_db))
         payload = jwt.decode(req.refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
         if payload.get("type") != "refresh":
             raise HTTPException(status_code=401, detail="Invalid token type")
-        user_id = payload.get("sub")
-    except JWTError:
+        user_id_str = payload.get("sub")
+        if user_id_str is None:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+        # Convert string back to int for database lookup
+        user_id = int(user_id_str)
+    except (JWTError, ValueError, TypeError):
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     result = await db.execute(select(User).where(User.id == user_id))
