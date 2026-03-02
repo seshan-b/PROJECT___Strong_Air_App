@@ -334,7 +334,7 @@ class StrongAirAPITester:
         # Test worker cannot access admin endpoints
         if self.worker_token:
             admin_endpoints = [
-                ("api/users", "Users List"),
+                ("api/users/", "Users List"),  # Fixed trailing slash
                 ("api/analytics/summary", "Analytics Summary"),
             ]
             
