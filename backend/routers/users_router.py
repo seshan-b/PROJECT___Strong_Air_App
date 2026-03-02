@@ -30,7 +30,7 @@ async def list_users(
 @router.get("/pending", response_model=List[UserResponse])
 async def list_pending_users(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     result = await db.execute(
         select(User).where(User.status == UserStatus.pending).order_by(User.created_at.desc())
