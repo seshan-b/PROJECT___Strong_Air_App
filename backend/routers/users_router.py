@@ -81,7 +81,7 @@ async def update_profile(
 async def get_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
