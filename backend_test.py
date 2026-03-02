@@ -376,6 +376,17 @@ def main():
         tester.test_analytics_hours_by_user()
         tester.test_analytics_hours_by_job()
     
+    # Users API tests (role validation)
+    if admin_login_success:
+        print("\n👥 Users Management Tests")
+        tester.test_users_api()
+        tester.test_removed_admin_endpoint()
+    
+    # Role-based access tests
+    if admin_login_success or worker_login_success:
+        print("\n🔒 Role-Based Access Tests")
+        tester.test_role_validation()
+    
     # Clock management tests
     if admin_login_success or worker_login_success:
         print("\n⏰ Clock Management Tests")
