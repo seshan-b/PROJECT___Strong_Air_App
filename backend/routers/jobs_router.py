@@ -46,7 +46,7 @@ async def list_jobs(
     return response
 
 
-@router.post("/", response_model=JobResponse)
+@router.post("", response_model=JobResponse)
 async def create_job(
     req: JobCreateRequest,
     db: AsyncSession = Depends(get_db),
