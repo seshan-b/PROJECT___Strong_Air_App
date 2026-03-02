@@ -103,30 +103,3 @@ async def delete_user(
     await db.delete(user)
     await db.commit()
     return {"detail": "User deleted"}
-
-
-@router.post("/admin", response_model=UserResponse)
-async def create_admin(
-    req: CreateAdminRequest,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin)),
-):
-    existing = await db.execute(select(User).where(User.email == req.email))
-    if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Email already registered")
-    existing = await db.execute(select(User).where(User.username == req.username))
-    if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Username already taken")
-    user = User(
-        name=req.name,
-        email=req.email,
-        phone=req.phone,
-        username=req.username,
-        password_hash=hash_password(req.password),
-        role=UserRole.admin,
-        status=UserStatus.verified,
-    )
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
-    return user
