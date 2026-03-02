@@ -324,7 +324,7 @@ class StrongAirAPITester:
             success, _ = self.run_test(
                 "Admin Access Users",
                 "GET", 
-                "api/users",
+                "api/users/",  # Fixed trailing slash
                 200,
                 token=self.admin_token
             )
