@@ -15,7 +15,7 @@ async def list_users(
     status: str = None,
     role: str = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(UserRole.superadmin, UserRole.admin)),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
     query = select(User)
     if status:
