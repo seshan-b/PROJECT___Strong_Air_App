@@ -11,7 +11,7 @@ from typing import List
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
 
-@router.get("/", response_model=List[JobResponse])
+@router.get("", response_model=List[JobResponse])
 async def list_jobs(
     status: str = None,
     db: AsyncSession = Depends(get_db),
