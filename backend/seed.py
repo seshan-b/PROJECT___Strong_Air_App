@@ -30,19 +30,6 @@ async def seed():
         db.add(super_admin)
         await db.flush()
 
-        # Create Admin
-        admin = User(
-            name="Site Manager",
-            email="manager@strongair.com",
-            username="sitemanager",
-            password_hash=hash_password("manager123"),
-            role=UserRole.admin,
-            status=UserStatus.verified,
-            phone="+64 21 000 0002",
-        )
-        db.add(admin)
-        await db.flush()
-
         # Create Workers
         workers = []
         worker_data = [
