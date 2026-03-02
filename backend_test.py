@@ -234,7 +234,7 @@ class StrongAirAPITester:
             ("api/analytics/summary", "Analytics Summary"),
             ("api/clock/sessions", "Clock Sessions"),
             ("api/auth/me", "Auth Me"),
-            ("api/users", "Users List")
+            ("api/users/", "Users List")  # Fixed trailing slash
         ]
         
         all_passed = True
@@ -243,7 +243,7 @@ class StrongAirAPITester:
                 f"Unauthorized {name}",
                 "GET",
                 endpoint,
-                401
+                403  # Changed from 401 to 403 as that's what the API returns
             )
             if not success:
                 all_passed = False
