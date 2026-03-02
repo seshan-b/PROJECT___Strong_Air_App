@@ -233,7 +233,8 @@ class StrongAirAPITester:
         endpoints = [
             ("api/analytics/summary", "Analytics Summary"),
             ("api/clock/sessions", "Clock Sessions"),
-            ("api/auth/me", "Auth Me")
+            ("api/auth/me", "Auth Me"),
+            ("api/users", "Users List")
         ]
         
         all_passed = True
@@ -248,6 +249,108 @@ class StrongAirAPITester:
                 all_passed = False
         
         return all_passed
+
+    def test_users_api(self):
+        """Test users API endpoints"""
+        if not self.admin_token:
+            print("❌ Skipping users API - no admin token")
+            return False
+        
+        # Test GET /api/users
+        success, response = self.run_test(
+            "List Users",
+            "GET",
+            "api/users",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            # Validate that only superadmin and user roles exist
+            roles_found = set()
+            for user in response:
+                role = user.get('role')
+                roles_found.add(role)
+                print(f"   User: {user.get('name')} - Role: {role}")
+            
+            # Check that no 'admin' role exists
+            if 'admin' in roles_found:
+                print("❌ CRITICAL: Found deprecated 'admin' role in users!")
+                self.critical_issues.append("Deprecated 'admin' role found in user data")
+                return False
+            
+            valid_roles = {'superadmin', 'user'}
+            invalid_roles = roles_found - valid_roles
+            if invalid_roles:
+                print(f"❌ Invalid roles found: {invalid_roles}")
+                self.critical_issues.append(f"Invalid user roles found: {invalid_roles}")
+                return False
+            
+            print(f"   ✅ Valid roles found: {roles_found}")
+        
+        return success
+
+    def test_removed_admin_endpoint(self):
+        """Test that POST /api/users/admin endpoint no longer exists"""
+        if not self.admin_token:
+            print("❌ Skipping admin endpoint test - no admin token")
+            return False
+        
+        # This endpoint should return 404 since it was removed
+        success, _ = self.run_test(
+            "Create Admin Endpoint (Should be 404)",
+            "POST",
+            "api/users/admin",
+            404,
+            data={"email": "test@test.com", "password": "test123", "name": "Test Admin"},
+            token=self.admin_token
+        )
+        
+        if success:
+            print("   ✅ Admin creation endpoint correctly removed")
+        else:
+            self.critical_issues.append("Admin creation endpoint still exists - should be removed")
+        
+        return success
+
+    def test_role_validation(self):
+        """Test role-based authentication and authorization"""
+        tests_passed = 0
+        total_tests = 0
+        
+        # Test admin can access users endpoint
+        if self.admin_token:
+            total_tests += 1
+            success, _ = self.run_test(
+                "Admin Access Users",
+                "GET", 
+                "api/users",
+                200,
+                token=self.admin_token
+            )
+            if success:
+                tests_passed += 1
+        
+        # Test worker cannot access admin endpoints
+        if self.worker_token:
+            admin_endpoints = [
+                ("api/users", "Users List"),
+                ("api/analytics/summary", "Analytics Summary"),
+            ]
+            
+            for endpoint, name in admin_endpoints:
+                total_tests += 1
+                success, _ = self.run_test(
+                    f"Worker Access Denied - {name}",
+                    "GET",
+                    endpoint,
+                    403,  # Should be forbidden
+                    token=self.worker_token
+                )
+                if success:
+                    tests_passed += 1
+        
+        return tests_passed == total_tests if total_tests > 0 else False
 
 def main():
     print("🚀 Starting Strong Air API Testing...")
