@@ -10,7 +10,7 @@ from typing import List
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 
-@router.get("/", response_model=List[UserResponse])
+@router.get("", response_model=List[UserResponse])
 async def list_users(
     status: str = None,
     role: str = None,
