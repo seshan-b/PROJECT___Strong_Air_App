@@ -1,0 +1,93 @@
+import React, { useEffect, useState } from 'react';
+import { clockApi } from '../../api/client';
+import { Clock } from 'lucide-react';
+import type { ClockSession } from '../../types';
+
+const WorkerHoursPage: React.FC = () => {
+  const [sessions, setSessions] = useState<ClockSession[]>([]);
+  const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
+
+  const fetchSessions = async () => {
+    try {
+      const params: any = {};
+      if (dateFilter.start) params.start_date = dateFilter.start;
+      if (dateFilter.end) params.end_date = dateFilter.end;
+      const res = await clockApi.sessions(params);
+      setSessions(res.data);
+    } catch (err) { console.error(err); }
+  };
+
+  useEffect(() => { fetchSessions(); }, [dateFilter]);
+
+  const totalHours = sessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) / 60;
+  const formatDuration = (mins: number | null) => {
+    if (!mins) return '-';
+    const h = Math.floor(mins / 60);
+    const m = Math.round(mins % 60);
+    return `${h}h ${m}m`;
+  };
+
+  return (
+    <div className="animate-fade-in max-w-3xl mx-auto" data-testid="worker-hours-page">
+      <div className="mb-8">
+        <h1 className="font-heading font-bold text-2xl text-primary-900">My Hours</h1>
+        <p className="text-primary-500 text-sm mt-1">Track your worked hours</p>
+      </div>
+
+      {/* Summary Card */}
+      <div className="bg-accent text-white rounded-lg p-6 mb-6" data-testid="hours-summary">
+        <div className="flex items-center gap-3 mb-2">
+          <Clock size={20} className="text-white/80" />
+          <span className="text-sm font-medium text-white/80">Total Hours Worked</span>
+        </div>
+        <p className="font-heading font-extrabold text-4xl">{totalHours.toFixed(1)}h</p>
+        <p className="text-sm text-white/60 mt-1">{sessions.filter(s => s.clock_out).length} completed sessions</p>
+      </div>
+
+      {/* Date Filters */}
+      <div className="flex items-center gap-3 mb-6">
+        <input
+          data-testid="hours-start-filter"
+          type="date"
+          value={dateFilter.start}
+          onChange={(e) => setDateFilter(p => ({ ...p, start: e.target.value }))}
+          className="h-10 px-3 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+        />
+        <span className="text-primary-400 text-sm">to</span>
+        <input
+          data-testid="hours-end-filter"
+          type="date"
+          value={dateFilter.end}
+          onChange={(e) => setDateFilter(p => ({ ...p, end: e.target.value }))}
+          className="h-10 px-3 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+        />
+      </div>
+
+      {/* Sessions List */}
+      <div className="space-y-3">
+        {sessions.map((session) => (
+          <div key={session.id} data-testid={`hour-row-${session.id}`} className="bg-white rounded-lg border border-primary-200 p-4 flex items-center justify-between">
+            <div>
+              <p className="font-medium text-sm text-primary-900">{session.job_title || `Job #${session.job_id}`}</p>
+              <p className="text-xs text-primary-400 mt-0.5">
+                {new Date(session.clock_in).toLocaleDateString()} {new Date(session.clock_in).toLocaleTimeString()}
+                {session.clock_out && ` - ${new Date(session.clock_out).toLocaleTimeString()}`}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="font-heading font-bold text-lg text-primary-900">{formatDuration(session.duration_minutes)}</p>
+              {!session.clock_out && (
+                <span className="text-xs text-accent font-medium">In Progress</span>
+              )}
+            </div>
+          </div>
+        ))}
+        {sessions.length === 0 && (
+          <div className="text-center py-12 text-primary-400 text-sm">No hours recorded yet</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default WorkerHoursPage;
