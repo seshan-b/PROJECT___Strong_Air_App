@@ -27,6 +27,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       localStorage.setItem('refresh_token', data.refresh_token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
+      // Update parent component state
+      if (onLoginSuccess) {
+        onLoginSuccess(data.user);
+      }
+
       if (data.user.role === 'superadmin' || data.user.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
