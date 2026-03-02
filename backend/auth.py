@@ -40,6 +40,9 @@ def create_access_token(data: dict) -> str:
 def create_refresh_token(data: dict) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    # Ensure sub is a string as required by python-jose
+    if "sub" in to_encode and isinstance(to_encode["sub"], int):
+        to_encode["sub"] = str(to_encode["sub"])
     to_encode.update({"exp": expire, "type": "refresh"})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
