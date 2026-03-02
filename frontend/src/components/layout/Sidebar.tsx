@@ -60,11 +60,10 @@ const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle }) => {
         <div className="px-4 py-3 border-b border-primary-800">
           <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full ${
             role === 'superadmin' ? 'bg-purple-500/20 text-purple-300' :
-            role === 'admin' ? 'bg-accent/20 text-accent-300' :
             'bg-primary-700 text-primary-300'
           }`}>
             <Shield size={12} />
-            {role === 'superadmin' ? 'Super Admin' : role === 'admin' ? 'Admin' : 'Worker'}
+            {role === 'superadmin' ? 'Super Admin' : 'Worker'}
           </span>
         </div>
       )}
