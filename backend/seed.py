@@ -114,11 +114,11 @@ async def seed():
                     db.add(session)
 
         # Create message threads
-        thread1 = MessageThread(subject="Safety Meeting Tomorrow", created_by=admin.id)
+        thread1 = MessageThread(subject="Safety Meeting Tomorrow", created_by=super_admin.id)
         db.add(thread1)
         await db.flush()
 
-        msg1 = Message(thread_id=thread1.id, sender_id=admin.id, body="Reminder: Mandatory safety meeting tomorrow at 7:30 AM in the site office. Please be on time.")
+        msg1 = Message(thread_id=thread1.id, sender_id=super_admin.id, body="Reminder: Mandatory safety meeting tomorrow at 7:30 AM in the site office. Please be on time.")
         db.add(msg1)
         await db.flush()
 
@@ -132,9 +132,9 @@ async def seed():
         msg2 = Message(thread_id=thread2.id, sender_id=workers[0].id, body="Hi, I need to work overtime this Saturday for the bridge project. Is that approved?")
         db.add(msg2)
         await db.flush()
-        db.add(MessageRecipient(message_id=msg2.id, recipient_id=admin.id))
+        db.add(MessageRecipient(message_id=msg2.id, recipient_id=super_admin.id))
 
-        msg3 = Message(thread_id=thread2.id, sender_id=admin.id, body="Approved. Please log your hours as usual.")
+        msg3 = Message(thread_id=thread2.id, sender_id=super_admin.id, body="Approved. Please log your hours as usual.")
         db.add(msg3)
         await db.flush()
         db.add(MessageRecipient(message_id=msg3.id, recipient_id=workers[0].id))
@@ -143,7 +143,6 @@ async def seed():
         print("Database seeded successfully!")
         print("\nDemo Accounts:")
         print("  Super Admin: admin@strongair.com / admin123")
-        print("  Admin: manager@strongair.com / manager123")
         print("  Workers: john@strongair.com / worker123")
         print("           sarah@strongair.com / worker123")
         print("           mike@strongair.com / worker123")
