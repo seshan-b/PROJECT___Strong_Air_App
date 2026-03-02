@@ -51,7 +51,7 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         {/* Public Routes */}
-        <Route path="/login" element={user ? <Navigate to={isAdmin ? '/admin/dashboard' : '/worker/dashboard'} /> : <LoginPage />} />
+        <Route path="/login" element={user ? <Navigate to={isAdmin ? '/admin/dashboard' : '/worker/dashboard'} /> : <LoginPage onLoginSuccess={(userData) => setUser(userData)} />} />
         <Route path="/register" element={user ? <Navigate to={isAdmin ? '/admin/dashboard' : '/worker/dashboard'} /> : <RegisterPage />} />
         <Route path="/pending" element={<PendingApprovalPage />} />
 
