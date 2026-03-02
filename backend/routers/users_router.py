@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database import get_db
 from models import User, UserRole, UserStatus
-from schemas import UserResponse, UserUpdateRequest, ApproveUserRequest, CreateAdminRequest
+from schemas import UserResponse, UserUpdateRequest, ApproveUserRequest
 from auth import get_current_user, require_role, hash_password
 from typing import List
 
