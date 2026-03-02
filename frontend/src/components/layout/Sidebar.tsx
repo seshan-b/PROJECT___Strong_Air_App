@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 interface SidebarProps {
-  role: 'superadmin' | 'admin' | 'user';
+  role: 'superadmin' | 'user';
   collapsed: boolean;
   onToggle: () => void;
 }
@@ -19,7 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle }) => {
     navigate('/login');
   };
 
-  const isAdmin = role === 'superadmin' || role === 'admin';
+  const isAdmin = role === 'superadmin';
 
   const adminLinks = [
     { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
