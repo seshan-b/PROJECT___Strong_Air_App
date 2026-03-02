@@ -45,5 +45,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react-router-dom": "^5.3.3",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.6",
+    "tailwindcss": "3"
   }
 }
