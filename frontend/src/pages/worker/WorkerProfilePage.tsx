@@ -9,7 +9,7 @@ interface WorkerProfileProps {
 }
 
 const WorkerProfilePage: React.FC<WorkerProfileProps> = ({ user, onUserUpdate }) => {
-  const [form, setForm] = useState({ name: user.name, phone: user.phone || '', email: user.email });
+  const [form, setForm] = useState({ name: user.name, phone: user.phone || '', email: user.email, username: user.username });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -70,6 +70,16 @@ const WorkerProfilePage: React.FC<WorkerProfileProps> = ({ user, onUserUpdate })
               type="text"
               value={form.name}
               onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))}
+              className="w-full h-10 px-4 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-primary-700 mb-1.5">Username</label>
+            <input
+              data-testid="profile-username-input"
+              type="text"
+              value={form.username}
+              onChange={(e) => setForm(p => ({ ...p, username: e.target.value }))}
               className="w-full h-10 px-4 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
             />
           </div>

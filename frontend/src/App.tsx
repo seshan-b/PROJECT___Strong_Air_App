@@ -63,6 +63,7 @@ const App: React.FC = () => {
             <Route path="/admin/jobs" element={<AdminJobsPage />} />
             <Route path="/admin/clock-sessions" element={<AdminClockSessionsPage />} />
             <Route path="/admin/messages" element={<MessagesPage currentUser={user} />} />
+            <Route path="/admin/profile" element={<WorkerProfilePage user={user} onUserUpdate={handleUserUpdate} />} />
           </Route>
         )}
 

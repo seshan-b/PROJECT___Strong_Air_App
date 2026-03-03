@@ -107,6 +107,11 @@ async def update_profile(
         if existing.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="Email already taken")
         current_user.email = req.email
+    if req.username is not None:
+        existing = await db.execute(select(User).where(User.username == req.username, User.id != current_user.id))
+        if existing.scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Username already taken")
+        current_user.username = req.username
     await db.commit()
     await db.refresh(current_user)
     return current_user

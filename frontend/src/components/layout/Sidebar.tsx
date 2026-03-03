@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, Users, Briefcase, Clock, MessageSquare, 
-  LogOut, Shield, ChevronLeft, ChevronRight, HardHat
+import {
+  LayoutDashboard, Users, Briefcase, Clock, MessageSquare,
+  LogOut, Shield, ChevronLeft, ChevronRight, HardHat, UserCircle
 } from 'lucide-react';
 
 interface SidebarLink {
@@ -35,6 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle, unreadCoun
     { to: '/admin/jobs', icon: Briefcase, label: 'Jobs' },
     { to: '/admin/clock-sessions', icon: Clock, label: 'Clock Sessions' },
     { to: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: unreadCount },
+    { to: '/admin/profile', icon: UserCircle, label: 'Profile' },
   ];
 
   const workerLinks: SidebarLink[] = [

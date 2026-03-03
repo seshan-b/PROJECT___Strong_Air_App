@@ -49,6 +49,7 @@ class UserUpdateRequest(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
+    username: Optional[str] = Field(None, min_length=3, max_length=100)
 
 
 class ApproveUserRequest(BaseModel):

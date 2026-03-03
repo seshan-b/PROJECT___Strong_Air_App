@@ -64,7 +64,7 @@ export const usersApi = {
   pending: () => api.get<User[]>('/api/users/pending'),
   approve: (userId: number, status: string) =>
     api.patch<User>(`/api/users/${userId}/approve`, { status }),
-  updateProfile: (data: { name?: string; phone?: string; email?: string }) =>
+  updateProfile: (data: { name?: string; phone?: string; email?: string; username?: string }) =>
     api.patch<User>('/api/users/me', data),
   get: (userId: number) => api.get<User>(`/api/users/${userId}`),
   changeRole: (userId: number, role: string) =>
