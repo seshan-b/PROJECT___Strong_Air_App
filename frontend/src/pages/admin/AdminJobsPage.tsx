@@ -17,7 +17,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { jobsApi, usersApi } from '../../api/client';
-import { Plus, Users, Edit2, Archive, ArchiveRestore, Trash2, X, MapPin } from 'lucide-react';
+import { Plus, Users, Edit2, Archive, ArchiveRestore, Trash2, X, MapPin, ExternalLink } from 'lucide-react';
 import type { Job, User } from '../../types';
 
 const AdminJobsPage: React.FC = () => {
@@ -207,9 +207,21 @@ const AdminJobsPage: React.FC = () => {
                 </div>
               )}
               {job.location && (
-                <p className="text-xs text-primary-400 mt-1.5 flex items-center gap-1 truncate mb-3">
-                  <MapPin size={11} className="shrink-0" />{job.location}
-                </p>
+                <div className="mt-1.5 mb-3 flex items-center gap-1 min-w-0">
+                  <MapPin size={11} className="shrink-0 text-primary-400" />
+                  <p className="text-xs text-primary-400 truncate flex-1">{job.location}</p>
+                  {job.latitude && job.longitude && (
+                    <a
+                      href={`https://www.google.com/maps?q=${job.latitude},${job.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 text-primary-400 hover:text-accent transition-colors"
+                      title="Open in Google Maps"
+                    >
+                      <ExternalLink size={11} />
+                    </a>
+                  )}
+                </div>
               )}
               {!job.location && <div className="mb-4" />}
 

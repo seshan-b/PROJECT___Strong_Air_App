@@ -64,6 +64,9 @@ async def list_jobs(
             title=job.title,
             description=job.description,
             image_url=job.image_url,
+            location=job.location,
+            latitude=job.latitude,
+            longitude=job.longitude,
             status=job.status.value if isinstance(job.status, JobStatus) else job.status,
             created_at=job.created_at,
             assigned_users=assigned_users,
@@ -79,7 +82,7 @@ async def create_job(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
-    job = Job(title=req.title, description=req.description, image_url=req.image_url)
+    job = Job(title=req.title, description=req.description, image_url=req.image_url, location=req.location, latitude=req.latitude, longitude=req.longitude)
     db.add(job)
     await db.commit()
     await db.refresh(job)
@@ -88,6 +91,9 @@ async def create_job(
         title=job.title,
         description=job.description,
         image_url=job.image_url,
+        location=job.location,
+        latitude=job.latitude,
+        longitude=job.longitude,
         status=job.status.value if isinstance(job.status, JobStatus) else job.status,
         created_at=job.created_at,
         assigned_users=[],
@@ -113,6 +119,9 @@ async def get_job(
         title=job.title,
         description=job.description,
         image_url=job.image_url,
+        location=job.location,
+        latitude=job.latitude,
+        longitude=job.longitude,
         status=job.status.value if isinstance(job.status, JobStatus) else job.status,
         created_at=job.created_at,
         assigned_users=assigned_users,
@@ -151,6 +160,12 @@ async def update_job(
         job.description = req.description
     if req.image_url is not None:
         job.image_url = req.image_url
+    if req.location is not None:
+        job.location = req.location
+    if req.latitude is not None:
+        job.latitude = req.latitude
+    if req.longitude is not None:
+        job.longitude = req.longitude
     if req.status is not None:
         job.status = req.status
     await db.commit()
@@ -160,6 +175,9 @@ async def update_job(
         title=job.title,
         description=job.description,
         image_url=job.image_url,
+        location=job.location,
+        latitude=job.latitude,
+        longitude=job.longitude,
         status=job.status.value if isinstance(job.status, JobStatus) else job.status,
         created_at=job.created_at,
         assigned_users=[],
@@ -281,6 +299,9 @@ async def my_assigned_jobs(
                     title=job.title,
                     description=job.description,
                     image_url=job.image_url,
+                    location=job.location,
+                    latitude=job.latitude,
+                    longitude=job.longitude,
                     status=job.status.value if isinstance(job.status, JobStatus) else job.status,
                     created_at=job.created_at,
                     assigned_users=[],

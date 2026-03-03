@@ -77,13 +77,13 @@ async def seed():
         # Create Jobs
         jobs = []
         job_data = [
-            ("Highway Bridge Repair", "Structural repair work on the main highway bridge overpass."),
-            ("Office Tower Foundation", "Foundation laying for the new 12-story office complex downtown."),
-            ("Residential Block C", "Construction of residential apartments in Block C of the development."),
-            ("Warehouse Renovation", "Interior renovation and structural reinforcement of the old warehouse."),
+            ("Highway Bridge Repair", "Structural repair work on the main highway bridge overpass.", "Auckland Harbour Bridge, Auckland", -36.8282, 174.7681),
+            ("Office Tower Foundation", "Foundation laying for the new 12-story office complex downtown.", "Sky Tower, Auckland CBD", -36.8485, 174.7633),
+            ("Residential Block C", "Construction of residential apartments in Block C of the development.", "Manukau, Auckland", -36.9969, 174.8793),
+            ("Warehouse Renovation", "Interior renovation and structural reinforcement of the old warehouse.", "Penrose, Auckland", -36.9163, 174.8060),
         ]
-        for title, desc in job_data:
-            job = Job(title=title, description=desc, status=JobStatus.active)
+        for title, desc, location, lat, lng in job_data:
+            job = Job(title=title, description=desc, location=location, latitude=lat, longitude=lng, status=JobStatus.active)
             db.add(job)
             jobs.append(job)
         await db.flush()
