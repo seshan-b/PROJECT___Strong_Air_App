@@ -86,6 +86,9 @@ class JobCreateRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
     image_url: Optional[str] = None
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class JobUpdateRequest(BaseModel):
@@ -93,6 +96,9 @@ class JobUpdateRequest(BaseModel):
     description: Optional[str] = None
     image_url: Optional[str] = None
     status: Optional[str] = None
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class JobResponse(BaseModel):
@@ -100,6 +106,9 @@ class JobResponse(BaseModel):
     title: str
     description: Optional[str] = None
     image_url: Optional[str] = None
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     status: str
     created_at: datetime
     assigned_users: Optional[List[UserResponse]] = None

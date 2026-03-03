@@ -65,6 +65,9 @@ class Job(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     image_url = Column(String(500), nullable=True)
+    location = Column(String(500), nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
     status = Column(SAEnum(JobStatus), default=JobStatus.active, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 

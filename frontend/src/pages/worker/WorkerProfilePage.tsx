@@ -32,13 +32,19 @@ const WorkerProfilePage: React.FC<WorkerProfileProps> = ({ user, onUserUpdate })
     setSaving(true);
     setError('');
     setSuccess(false);
+    if (!/^[a-z0-9_-]+$/.test(form.username)) {
+      setError('Username can only contain lowercase letters (a-z), numbers, hyphens and underscores.');
+      setSaving(false);
+      return;
+    }
     try {
       const res = await usersApi.updateProfile(form);
       onUserUpdate(res.data);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Update failed');
+      const detail = err.response?.data?.detail;
+      setError(Array.isArray(detail) ? detail.map((e: any) => e.msg).join(' · ') : detail || 'Update failed');
     }
     setSaving(false);
   };

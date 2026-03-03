@@ -51,7 +51,8 @@ const AdminClockSessionsPage: React.FC = () => {
       setSessions(sessionsResult.value.data);
     } else {
       const err = (sessionsResult as PromiseRejectedResult).reason;
-      setError(err?.response?.data?.detail || 'Failed to load clock sessions');
+      const detail = err?.response?.data?.detail;
+      setError(Array.isArray(detail) ? detail.map((e: any) => e.msg).join(' · ') : detail || 'Failed to load clock sessions');
     }
 
     if (usersResult.status === 'fulfilled') {

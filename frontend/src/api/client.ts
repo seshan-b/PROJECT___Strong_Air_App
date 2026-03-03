@@ -98,9 +98,9 @@ export const usersApi = {
 export const jobsApi = {
   list: (status?: string) => api.get<Job[]>('/api/jobs', { params: status ? { status } : {} }),
   get: (jobId: number) => api.get<Job>(`/api/jobs/${jobId}`),
-  create: (data: { title: string; description?: string; image_url?: string }) =>
+  create: (data: { title: string; description?: string; image_url?: string; location?: string; latitude?: number | null; longitude?: number | null }) =>
     api.post<Job>('/api/jobs', data),
-  update: (jobId: number, data: { title?: string; description?: string; status?: string }) =>
+  update: (jobId: number, data: { title?: string; description?: string; status?: string; location?: string; latitude?: number | null; longitude?: number | null }) =>
     api.patch<Job>(`/api/jobs/${jobId}`, data),
   assign: (jobId: number, userIds: number[]) =>
     api.post(`/api/jobs/${jobId}/assign`, { job_id: jobId, user_ids: userIds }),

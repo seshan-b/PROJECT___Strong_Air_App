@@ -31,6 +31,12 @@ case "$MODE" in
   dev)
     echo "==> [dev] Starting development environment..."
 
+    # Load all env vars from root .env so the frontend dev server picks them up
+    set -a
+    # shellcheck source=.env
+    source "$ROOT_DIR/.env"
+    set +a
+
     # Start only the postgres container
     echo "==> [1/3] Starting PostgreSQL container..."
     docker compose -f "$ROOT_DIR/docker-compose.yml" up postgres -d

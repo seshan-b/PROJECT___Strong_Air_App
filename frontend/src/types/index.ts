@@ -31,6 +31,9 @@ export interface Job {
   title: string;
   description: string | null;
   image_url: string | null;
+  location: string | null;
+  latitude: number | null;
+  longitude: number | null;
   status: JobStatus;
   created_at: string;
   assigned_users?: User[];

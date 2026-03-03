@@ -55,7 +55,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         navigate('/pending');
         return;
       }
-      setError(err.response?.data?.detail || 'Login failed');
+      const detail = err.response?.data?.detail;
+      setError(Array.isArray(detail) ? detail.map((e: any) => e.msg).join(' · ') : detail || 'Login failed');
     } finally {
       setLoading(false);
     }
