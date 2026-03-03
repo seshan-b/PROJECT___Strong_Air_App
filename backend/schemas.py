@@ -22,7 +22,7 @@ class RegisterRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     email: str = Field(..., min_length=1, max_length=255)
     phone: Optional[str] = None
-    username: str = Field(..., min_length=3, max_length=100)
+    username: str = Field(..., min_length=4, max_length=25, pattern=r"^[a-z0-9_-]+$")
     password: str = Field(..., min_length=6)
 
 
@@ -70,7 +70,7 @@ class UserUpdateRequest(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
-    username: Optional[str] = Field(None, min_length=3, max_length=100)
+    username: Optional[str] = Field(None, min_length=4, max_length=25, pattern=r"^[a-z0-9_-]+$")
 
 
 class ApproveUserRequest(BaseModel):
