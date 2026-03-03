@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { jobsApi, usersApi } from '../../api/client';
-import { Plus, Users, Edit2, Archive, Trash2, X } from 'lucide-react';
+import { Plus, Users, Edit2, Archive, ArchiveRestore, Trash2, X } from 'lucide-react';
 import type { Job, User } from '../../types';
 
 const AdminJobsPage: React.FC = () => {
@@ -50,6 +50,13 @@ const AdminJobsPage: React.FC = () => {
   const handleArchive = async (jobId: number) => {
     try {
       await jobsApi.update(jobId, { status: 'archived' });
+      fetchData();
+    } catch (err) { console.error(err); }
+  };
+
+  const handleUnarchive = async (jobId: number) => {
+    try {
+      await jobsApi.update(jobId, { status: 'active' });
       fetchData();
     } catch (err) { console.error(err); }
   };
@@ -172,6 +179,16 @@ const AdminJobsPage: React.FC = () => {
                       }`}
                     >
                       <Archive size={14} /> Archive
+                    </button>
+                  )}
+                  {job.status === 'archived' && (
+                    <button
+                      data-testid={`unarchive-job-${job.id}`}
+                      onClick={() => handleUnarchive(job.id)}
+                      title="Restore job to active"
+                      className="flex items-center gap-1.5 text-xs font-medium text-green-600 hover:text-green-700 transition-colors"
+                    >
+                      <ArchiveRestore size={14} /> Unarchive
                     </button>
                   )}
                   <button

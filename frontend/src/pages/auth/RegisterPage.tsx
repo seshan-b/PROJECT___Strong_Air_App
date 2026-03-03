@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/client';
-import { HardHat } from 'lucide-react';
+import { HardHat, Eye, EyeOff } from 'lucide-react';
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', username: '', password: '', phone: '' });
+  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -96,16 +97,25 @@ const RegisterPage: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-primary-700 mb-1.5">Password</label>
-              <input
-                data-testid="register-password-input"
-                type="password"
-                value={form.password}
-                onChange={(e) => updateField('password', e.target.value)}
-                className="w-full h-11 px-4 rounded-md border border-primary-200 bg-white text-primary-900 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-                placeholder="Min 6 characters"
-                required
-                minLength={6}
-              />
+              <div className="relative">
+                <input
+                  data-testid="register-password-input"
+                  type={showPass ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(e) => updateField('password', e.target.value)}
+                  className="w-full h-11 px-4 pr-11 rounded-md border border-primary-200 bg-white text-primary-900 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                  placeholder="Min 6 characters"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600"
+                >
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             <button
               data-testid="register-submit-button"
