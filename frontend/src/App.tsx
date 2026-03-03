@@ -50,6 +50,11 @@ const App: React.FC = () => {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    setUser(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-primary-50">
@@ -71,7 +76,7 @@ const App: React.FC = () => {
 
         {/* Admin Routes */}
         {isAdmin && (
-          <Route element={<AppLayout user={user} />}>
+          <Route element={<AppLayout user={user} onLogout={handleLogout} />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/jobs" element={<AdminJobsPage />} />
@@ -83,7 +88,7 @@ const App: React.FC = () => {
 
         {/* Worker Routes */}
         {isWorker && (
-          <Route element={<AppLayout user={user} />}>
+          <Route element={<AppLayout user={user} onLogout={handleLogout} />}>
             <Route path="/worker/dashboard" element={<WorkerDashboard user={user} />} />
             <Route path="/worker/hours" element={<WorkerHoursPage />} />
             <Route path="/worker/messages" element={<MessagesPage currentUser={user} />} />

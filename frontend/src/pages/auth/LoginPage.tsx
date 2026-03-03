@@ -51,6 +51,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         navigate('/worker/dashboard');
       }
     } catch (err: any) {
+      if (err.response?.status === 403 && err.response?.data?.detail === 'Account pending approval') {
+        navigate('/pending');
+        return;
+      }
       setError(err.response?.data?.detail || 'Login failed');
     } finally {
       setLoading(false);

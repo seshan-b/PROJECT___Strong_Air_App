@@ -25,12 +25,22 @@ const RegisterPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!/^[a-z0-9_-]+$/.test(form.username)) {
+      setError('Username can only contain lowercase letters (a-z), numbers, hyphens and underscores.');
+      return;
+    }
+
     setLoading(true);
     try {
       await authApi.register(form);
       navigate('/pending');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Registration failed');
+      const detail = err.response?.data?.detail;
+      const message = Array.isArray(detail)
+        ? detail.map((e: any) => e.msg).join(' · ')
+        : detail || 'Registration failed';
+      setError(message);
     } finally {
       setLoading(false);
     }

@@ -13,7 +13,7 @@
 //   - The Logout button clears all stored tokens and redirects to /login.
 
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Briefcase, Clock, MessageSquare,
   LogOut, Shield, ChevronLeft, ChevronRight, HardHat, UserCircle
@@ -31,14 +31,12 @@ interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
   unreadCount?: number;
+  onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle, unreadCount = 0 }) => {
-  const navigate = useNavigate();
-
+const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle, unreadCount = 0, onLogout }) => {
   const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
+    onLogout();
   };
 
   const isAdmin = role === 'superadmin';

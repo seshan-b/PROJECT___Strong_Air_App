@@ -19,9 +19,10 @@ import type { User } from '../../types';
 
 interface AppLayoutProps {
   user: User;
+  onLogout: () => void;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({ user }) => {
+const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -44,6 +45,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ user }) => {
         collapsed={collapsed}
         onToggle={() => setCollapsed(!collapsed)}
         unreadCount={unreadCount}
+        onLogout={onLogout}
       />
       <main
         className={`transition-all duration-300 min-h-screen ${

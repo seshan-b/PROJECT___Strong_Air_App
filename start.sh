@@ -35,11 +35,15 @@ case "$MODE" in
     echo "==> [1/3] Starting PostgreSQL container..."
     docker compose -f "$ROOT_DIR/docker-compose.yml" up postgres -d
 
-    # Fresh frontend install
-    echo "==> [2/3] Cleaning and reinstalling frontend dependencies..."
+    # Install frontend dependencies only when needed
+    echo "==> [2/3] Checking frontend dependencies..."
     cd "$ROOT_DIR/frontend"
-    rm -rf node_modules
-    npm install
+    if [ ! -d node_modules ] || [ package.json -nt node_modules ]; then
+      echo "    Installing dependencies..."
+      npm install
+    else
+      echo "    Dependencies up to date, skipping install."
+    fi
 
     # Launch backend + frontend
     echo "==> [3/3] Starting backend (:8001) and frontend (:3001)..."
@@ -74,7 +78,7 @@ case "$MODE" in
     docker compose up --build -d
 
     echo ""
-    echo "  App   : http://localhost:80"
+    echo "  App   : http://localhost:3001"
     echo "  Stack : postgres, backend, frontend, nginx"
     echo ""
     echo "Logs: docker compose logs -f"
