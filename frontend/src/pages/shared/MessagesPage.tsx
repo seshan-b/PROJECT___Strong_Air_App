@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { messagesApi, usersApi } from '../../api/client';
 import { Send, MessageSquare, Plus, ArrowLeft } from 'lucide-react';
+import { formatDate, formatDateTime } from '../../utils/date';
 import type { MessageThread, Message, User } from '../../types';
 
 interface MessagesPageProps {
@@ -16,23 +17,21 @@ const MessagesPage: React.FC<MessagesPageProps> = ({ currentUser }) => {
   const [newForm, setNewForm] = useState({ subject: '', body: '', recipient_ids: [] as number[] });
   const [users, setUsers] = useState<User[]>([]);
 
-  const isAdmin = currentUser.role === 'superadmin';
-
-  const fetchThreads = async () => {
+  const fetchThreads = useCallback(async () => {
     try {
       const res = await messagesApi.threads();
       setThreads(res.data);
     } catch (err) { console.error(err); }
-  };
+  }, []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const res = await usersApi.list({ status: 'verified' });
       setUsers(res.data.filter(u => u.id !== currentUser.id));
     } catch (err) { console.error(err); }
-  };
+  }, [currentUser.id]);
 
-  useEffect(() => { fetchThreads(); fetchUsers(); }, []);
+  useEffect(() => { fetchThreads(); fetchUsers(); }, [fetchThreads, fetchUsers]);
 
   const openThread = async (threadId: number) => {
     setSelectedThread(threadId);
@@ -107,7 +106,7 @@ const MessagesPage: React.FC<MessagesPageProps> = ({ currentUser }) => {
               {thread.last_message && (
                 <p className="text-xs text-primary-400 mt-1 truncate">{thread.last_message.sender_name}: {thread.last_message.body}</p>
               )}
-              <p className="text-xs text-primary-300 mt-1">{new Date(thread.created_at).toLocaleDateString()}</p>
+              <p className="text-xs text-primary-300 mt-1">{formatDate(thread.created_at)}</p>
             </button>
           ))}
           {threads.length === 0 && (
@@ -151,7 +150,7 @@ const MessagesPage: React.FC<MessagesPageProps> = ({ currentUser }) => {
                       </p>
                       <p className="text-sm">{msg.body}</p>
                       <p className={`text-xs mt-1 ${msg.sender_id === currentUser.id ? 'text-primary-400' : 'text-primary-400'}`}>
-                        {new Date(msg.created_at).toLocaleString()}
+                        {formatDateTime(msg.created_at)}
                       </p>
                     </div>
                   </div>

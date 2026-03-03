@@ -1,23 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { clockApi } from '../../api/client';
 import { Clock } from 'lucide-react';
+import { formatDate, formatDateTime, dateToApi } from '../../utils/date';
 import type { ClockSession } from '../../types';
 
 const WorkerHoursPage: React.FC = () => {
   const [sessions, setSessions] = useState<ClockSession[]>([]);
-  const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     try {
       const params: any = {};
-      if (dateFilter.start) params.start_date = dateFilter.start;
-      if (dateFilter.end) params.end_date = dateFilter.end;
+      if (startDate) params.start_date = dateToApi(startDate);
+      if (endDate) params.end_date = dateToApi(endDate);
       const res = await clockApi.sessions(params);
       setSessions(res.data);
     } catch (err) { console.error(err); }
-  };
+  }, [startDate, endDate]);
 
-  useEffect(() => { fetchSessions(); }, [dateFilter]);
+  useEffect(() => { fetchSessions(); }, [fetchSessions]);
 
   const totalHours = sessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) / 60;
   const formatDuration = (mins: number | null) => {
@@ -46,20 +50,32 @@ const WorkerHoursPage: React.FC = () => {
 
       {/* Date Filters */}
       <div className="flex items-center gap-3 mb-6">
-        <input
+        <DatePicker
           data-testid="hours-start-filter"
-          type="date"
-          value={dateFilter.start}
-          onChange={(e) => setDateFilter(p => ({ ...p, start: e.target.value }))}
-          className="h-10 px-3 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+          selected={startDate}
+          onChange={(date) => setStartDate(date)}
+          selectsStart
+          startDate={startDate}
+          endDate={endDate}
+          maxDate={endDate ?? undefined}
+          dateFormat="dd/MM/yyyy"
+          placeholderText="DD/MM/YYYY"
+          isClearable
+          className="h-10 px-3 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent w-32"
         />
         <span className="text-primary-400 text-sm">to</span>
-        <input
+        <DatePicker
           data-testid="hours-end-filter"
-          type="date"
-          value={dateFilter.end}
-          onChange={(e) => setDateFilter(p => ({ ...p, end: e.target.value }))}
-          className="h-10 px-3 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+          selected={endDate}
+          onChange={(date) => setEndDate(date)}
+          selectsEnd
+          startDate={startDate}
+          endDate={endDate}
+          minDate={startDate ?? undefined}
+          dateFormat="dd/MM/yyyy"
+          placeholderText="DD/MM/YYYY"
+          isClearable
+          className="h-10 px-3 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent w-32"
         />
       </div>
 
@@ -70,8 +86,8 @@ const WorkerHoursPage: React.FC = () => {
             <div>
               <p className="font-medium text-sm text-primary-900">{session.job_title || `Job #${session.job_id}`}</p>
               <p className="text-xs text-primary-400 mt-0.5">
-                {new Date(session.clock_in).toLocaleDateString()} {new Date(session.clock_in).toLocaleTimeString()}
-                {session.clock_out && ` - ${new Date(session.clock_out).toLocaleTimeString()}`}
+                {formatDateTime(session.clock_in)}
+                {session.clock_out && ` – ${formatDate(session.clock_out)} ${new Date(session.clock_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
               </p>
             </div>
             <div className="text-right">

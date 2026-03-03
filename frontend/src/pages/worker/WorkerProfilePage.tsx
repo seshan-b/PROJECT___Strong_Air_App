@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { usersApi } from '../../api/client';
-import { UserCircle, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import type { User } from '../../types';
 
 interface WorkerProfileProps {

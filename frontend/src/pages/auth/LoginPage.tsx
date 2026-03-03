@@ -32,7 +32,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         onLoginSuccess(data.user);
       }
 
-      if (data.user.role === 'superadmin' || data.user.role === 'admin') {
+      if (data.user.role === 'superadmin') {
         navigate('/admin/dashboard');
       } else {
         navigate('/worker/dashboard');

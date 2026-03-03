@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { analyticsApi } from '../../api/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Users, Briefcase, Clock, UserPlus, Activity } from 'lucide-react';
@@ -35,7 +35,7 @@ const AdminDashboard: React.FC = () => {
   const [hoursOverTime, setHoursOverTime] = useState<HoursOverTime[]>([]);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const params = {
         start_date: dateRange.start || undefined,
@@ -54,9 +54,9 @@ const AdminDashboard: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch analytics:', err);
     }
-  };
+  }, [dateRange]);
 
-  useEffect(() => { fetchData(); }, [dateRange]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   return (
     <div className="animate-fade-in" data-testid="admin-dashboard">

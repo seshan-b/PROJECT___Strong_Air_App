@@ -39,6 +39,7 @@ class UserResponse(BaseModel):
     role: str
     status: str
     created_at: datetime
+    is_clocked_in: bool = False
 
     class Config:
         from_attributes = True
@@ -52,6 +53,10 @@ class UserUpdateRequest(BaseModel):
 
 class ApproveUserRequest(BaseModel):
     status: str  # verified or suspended
+
+
+class ChangeRoleRequest(BaseModel):
+    role: str  # user or superadmin
 
 
 # ── Jobs ──
@@ -76,6 +81,7 @@ class JobResponse(BaseModel):
     status: str
     created_at: datetime
     assigned_users: Optional[List[UserResponse]] = None
+    has_active_session: bool = False
 
     class Config:
         from_attributes = True

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { jobsApi, usersApi } from '../../api/client';
-import { Plus, Users, Edit2, Archive, X } from 'lucide-react';
+import { Plus, Users, Edit2, Archive, Trash2, X } from 'lucide-react';
 import type { Job, User } from '../../types';
 
 const AdminJobsPage: React.FC = () => {
@@ -11,6 +11,7 @@ const AdminJobsPage: React.FC = () => {
   const [editJob, setEditJob] = useState<Job | null>(null);
   const [form, setForm] = useState({ title: '', description: '' });
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+  const [unassignError, setUnassignError] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
@@ -53,6 +54,13 @@ const AdminJobsPage: React.FC = () => {
     } catch (err) { console.error(err); }
   };
 
+  const handleDelete = async (jobId: number) => {
+    try {
+      await jobsApi.delete(jobId);
+      fetchData();
+    } catch (err) { console.error(err); }
+  };
+
   const handleAssign = async () => {
     if (!showAssign) return;
     try {
@@ -64,10 +72,13 @@ const AdminJobsPage: React.FC = () => {
   };
 
   const handleUnassign = async (jobId: number, userId: number) => {
+    setUnassignError(null);
     try {
       await jobsApi.unassign(jobId, userId);
       fetchData();
-    } catch (err) { console.error(err); }
+    } catch (err: any) {
+      setUnassignError(err.response?.data?.detail || 'Failed to remove worker');
+    }
   };
 
   const openEdit = (job: Job) => {
@@ -83,6 +94,12 @@ const AdminJobsPage: React.FC = () => {
 
   return (
     <div className="animate-fade-in" data-testid="admin-jobs-page">
+      {unassignError && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm flex items-center justify-between">
+          <span>{unassignError}</span>
+          <button onClick={() => setUnassignError(null)} className="text-red-400 hover:text-red-600 ml-4"><X size={14} /></button>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-heading font-bold text-2xl text-primary-900">Job Management</h1>
@@ -141,11 +158,36 @@ const AdminJobsPage: React.FC = () => {
                 <button data-testid={`edit-job-${job.id}`} onClick={() => openEdit(job)} className="flex items-center gap-1.5 text-xs font-medium text-primary-500 hover:text-primary-700 transition-colors">
                   <Edit2 size={14} /> Edit
                 </button>
-                {job.status === 'active' && (
-                  <button data-testid={`archive-job-${job.id}`} onClick={() => handleArchive(job.id)} className="flex items-center gap-1.5 text-xs font-medium text-red-500 hover:text-red-700 transition-colors ml-auto">
-                    <Archive size={14} /> Archive
+                <div className="ml-auto flex items-center gap-2">
+                  {job.status === 'active' && (
+                    <button
+                      data-testid={`archive-job-${job.id}`}
+                      onClick={() => handleArchive(job.id)}
+                      disabled={job.has_active_session}
+                      title={job.has_active_session ? 'A worker is currently clocked in — clock out first' : 'Archive job'}
+                      className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                        job.has_active_session
+                          ? 'text-primary-300 cursor-not-allowed'
+                          : 'text-orange-500 hover:text-orange-700'
+                      }`}
+                    >
+                      <Archive size={14} /> Archive
+                    </button>
+                  )}
+                  <button
+                    data-testid={`delete-job-${job.id}`}
+                    onClick={() => handleDelete(job.id)}
+                    disabled={!!(job.assigned_users && job.assigned_users.length > 0)}
+                    title={job.assigned_users && job.assigned_users.length > 0 ? 'Remove all assigned workers before deleting' : 'Delete job'}
+                    className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                      job.assigned_users && job.assigned_users.length > 0
+                        ? 'text-primary-300 cursor-not-allowed'
+                        : 'text-red-500 hover:text-red-700'
+                    }`}
+                  >
+                    <Trash2 size={14} /> Delete
                   </button>
-                )}
+                </div>
               </div>
             </div>
           </div>

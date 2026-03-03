@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database import get_db
-from models import User, UserRole, UserStatus
-from schemas import UserResponse, UserUpdateRequest, ApproveUserRequest
+from models import User, UserRole, UserStatus, ClockSession, JobAssignment
+from sqlalchemy import delete
+from schemas import UserResponse, UserUpdateRequest, ApproveUserRequest, ChangeRoleRequest
 from auth import get_current_user, require_role, hash_password
 from typing import List
 
@@ -24,7 +25,17 @@ async def list_users(
         query = query.where(User.role == role)
     query = query.order_by(User.created_at.desc())
     result = await db.execute(query)
-    return result.scalars().all()
+    users = result.scalars().all()
+
+    active_result = await db.execute(
+        select(ClockSession.user_id).where(ClockSession.clock_out.is_(None))
+    )
+    active_user_ids = set(active_result.scalars().all())
+
+    return [
+        UserResponse.model_validate(u).model_copy(update={"is_clocked_in": u.id in active_user_ids})
+        for u in users
+    ]
 
 
 @router.get("/pending", response_model=List[UserResponse])
@@ -52,6 +63,30 @@ async def approve_user(
     if req.status not in ["verified", "suspended"]:
         raise HTTPException(status_code=400, detail="Invalid status")
     user.status = req.status
+    # When suspending, remove the worker from all job assignments
+    if req.status == "suspended":
+        await db.execute(delete(JobAssignment).where(JobAssignment.user_id == user_id))
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
+@router.patch("/{user_id}/role", response_model=UserResponse)
+async def change_user_role(
+    user_id: int,
+    req: ChangeRoleRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
+):
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if req.role not in ["user", "superadmin"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot change your own role")
+    user.role = req.role
     await db.commit()
     await db.refresh(user)
     return user

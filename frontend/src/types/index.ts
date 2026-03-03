@@ -11,6 +11,7 @@ export interface User {
   role: UserRole;
   status: UserStatus;
   created_at: string;
+  is_clocked_in?: boolean;
 }
 
 export interface AuthTokens {
@@ -28,6 +29,7 @@ export interface Job {
   status: JobStatus;
   created_at: string;
   assigned_users?: User[];
+  has_active_session?: boolean;
 }
 
 export interface ClockSession {

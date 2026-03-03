@@ -5,12 +5,13 @@ services:
       POSTGRES_USER: strongair
       POSTGRES_PASSWORD: strongair_pass
       POSTGRES_DB: strongair_db
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - internal
     restart: unless-stopped
-    # Database NOT publicly exposed - accessible only via internal network
 
   backend:
     build:

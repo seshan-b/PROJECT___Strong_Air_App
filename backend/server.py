@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -20,9 +21,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Strong Air API", version="1.0.0", lifespan=lifespan)
 
+allowed_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:3001").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

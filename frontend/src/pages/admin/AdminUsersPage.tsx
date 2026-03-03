@@ -1,26 +1,46 @@
-import React, { useEffect, useState } from 'react';
-import { usersApi } from '../../api/client';
-import { Check, X, Search } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { usersApi, authApi } from '../../api/client';
+import { Check, X, Search, Trash2 } from 'lucide-react';
 import type { User } from '../../types';
 
 const AdminUsersPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'verified' | 'suspended'>('all');
   const [search, setSearch] = useState('');
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
-  const fetchUsers = async () => {
+  useEffect(() => {
+    authApi.me().then(res => setCurrentUserId(res.data.id)).catch(() => {});
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
     try {
       const params = filter === 'all' ? {} : { status: filter };
       const res = await usersApi.list(params);
       setUsers(res.data);
     } catch (err) { console.error(err); }
-  };
+  }, [filter]);
 
-  useEffect(() => { fetchUsers(); }, [filter]);
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const handleApprove = async (userId: number, status: string) => {
     try {
       await usersApi.approve(userId, status);
+      fetchUsers();
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDelete = async (userId: number) => {
+    try {
+      await usersApi.delete(userId);
+      fetchUsers();
+    } catch (err) { console.error(err); }
+  };
+
+  const handleChangeRole = async (userId: number, currentRole: string) => {
+    const newRole = currentRole === 'superadmin' ? 'user' : 'superadmin';
+    try {
+      await usersApi.changeRole(userId, newRole);
       fetchUsers();
     } catch (err) { console.error(err); }
   };
@@ -112,45 +132,77 @@ const AdminUsersPage: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-primary-600">{user.email}</td>
-                <td className="px-6 py-4"><span className={roleBadge(user.role)}>{roleLabel(user.role)}</span></td>
+                <td className="px-6 py-4">
+                  {user.id === currentUserId ? (
+                    <span className={roleBadge(user.role)}>{roleLabel(user.role)}</span>
+                  ) : (
+                    <button
+                      data-testid={`change-role-${user.id}`}
+                      onClick={() => handleChangeRole(user.id, user.role)}
+                      title={user.role === 'superadmin' ? 'Click to demote to Worker' : 'Click to promote to Super Admin'}
+                      className={`${roleBadge(user.role)} cursor-pointer hover:opacity-75 transition-opacity`}
+                    >
+                      {roleLabel(user.role)}
+                    </button>
+                  )}
+                </td>
                 <td className="px-6 py-4"><span className={statusBadge(user.status)}>{user.status}</span></td>
                 <td className="px-6 py-4">
-                  {user.status === 'pending' && (
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
+                    {user.status === 'pending' && (
+                      <>
+                        <button
+                          data-testid={`approve-user-${user.id}`}
+                          onClick={() => handleApprove(user.id, 'verified')}
+                          className="p-1.5 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition-colors"
+                        >
+                          <Check size={16} />
+                        </button>
+                        <button
+                          data-testid={`reject-user-${user.id}`}
+                          onClick={() => handleApprove(user.id, 'suspended')}
+                          className="p-1.5 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      </>
+                    )}
+                    {user.status === 'verified' && user.role === 'user' && (
                       <button
-                        data-testid={`approve-user-${user.id}`}
+                        data-testid={`suspend-user-${user.id}`}
+                        onClick={() => { if (!user.is_clocked_in) handleApprove(user.id, 'suspended'); }}
+                        disabled={user.is_clocked_in}
+                        title={user.is_clocked_in ? 'Cannot suspend a user who is currently clocked in' : undefined}
+                        className={`text-xs font-medium ${user.is_clocked_in ? 'text-primary-300 cursor-not-allowed' : 'text-red-600 hover:text-red-700'}`}
+                      >
+                        Suspend
+                      </button>
+                    )}
+                    {user.status === 'suspended' && (
+                      <button
+                        data-testid={`reactivate-user-${user.id}`}
                         onClick={() => handleApprove(user.id, 'verified')}
-                        className="p-1.5 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition-colors"
+                        className="text-xs text-green-600 hover:text-green-700 font-medium"
                       >
-                        <Check size={16} />
+                        Reactivate
                       </button>
+                    )}
+                    {user.role === 'user' && (
                       <button
-                        data-testid={`reject-user-${user.id}`}
-                        onClick={() => handleApprove(user.id, 'suspended')}
-                        className="p-1.5 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
+                        data-testid={`delete-user-${user.id}`}
+                        onClick={() => handleDelete(user.id)}
+                        disabled={user.status !== 'suspended'}
+                        title={user.status !== 'suspended' ? 'Suspend the worker before deleting' : 'Delete worker'}
+                        className={`flex items-center gap-1 text-xs font-medium transition-colors ${
+                          user.status !== 'suspended'
+                            ? 'text-primary-300 cursor-not-allowed'
+                            : 'text-red-600 hover:text-red-700'
+                        }`}
                       >
-                        <X size={16} />
+                        <Trash2 size={13} /> Delete
                       </button>
-                    </div>
-                  )}
-                  {user.status === 'verified' && user.role === 'user' && (
-                    <button
-                      data-testid={`suspend-user-${user.id}`}
-                      onClick={() => handleApprove(user.id, 'suspended')}
-                      className="text-xs text-red-600 hover:text-red-700 font-medium"
-                    >
-                      Suspend
-                    </button>
-                  )}
-                  {user.status === 'suspended' && (
-                    <button
-                      data-testid={`reactivate-user-${user.id}`}
-                      onClick={() => handleApprove(user.id, 'verified')}
-                      className="text-xs text-green-600 hover:text-green-700 font-medium"
-                    >
-                      Reactivate
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

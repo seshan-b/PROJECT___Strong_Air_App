@@ -67,6 +67,8 @@ export const usersApi = {
   updateProfile: (data: { name?: string; phone?: string; email?: string }) =>
     api.patch<User>('/api/users/me', data),
   get: (userId: number) => api.get<User>(`/api/users/${userId}`),
+  changeRole: (userId: number, role: string) =>
+    api.patch<User>(`/api/users/${userId}/role`, { role }),
   delete: (userId: number) => api.delete(`/api/users/${userId}`),
 };
 
@@ -82,6 +84,7 @@ export const jobsApi = {
     api.post(`/api/jobs/${jobId}/assign`, { job_id: jobId, user_ids: userIds }),
   unassign: (jobId: number, userId: number) =>
     api.delete(`/api/jobs/${jobId}/assign/${userId}`),
+  delete: (jobId: number) => api.delete(`/api/jobs/${jobId}`),
   myAssigned: () => api.get<Job[]>('/api/jobs/my/assigned'),
 };
 

@@ -19,7 +19,7 @@ async def seed():
 
         # Create Super Admin
         super_admin = User(
-            name="Super Admin",
+            name="Sasindu M",
             email="admin@strongair.com",
             username="superadmin",
             password_hash=hash_password("admin123"),

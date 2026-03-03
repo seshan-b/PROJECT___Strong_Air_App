@@ -1,0 +1,86 @@
+#!/bin/bash
+
+set -e
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# If no argument given, prompt the user
+if [ -z "$1" ]; then
+  echo ""
+  echo "  Strong Air — Start Script"
+  echo "  ─────────────────────────"
+  echo "  1) Development  (frontend :3001, backend :8001, hot reload)"
+  echo "  2) Production   (full Docker stack, nginx :80)"
+  echo ""
+  read -rp "  Select environment [1/2]: " choice
+  case "$choice" in
+    1) MODE="dev" ;;
+    2) MODE="prod" ;;
+    *)
+      echo "Invalid choice. Exiting."
+      exit 1
+      ;;
+  esac
+else
+  MODE="$1"
+fi
+
+case "$MODE" in
+
+  # ─── LOCAL DEVELOPMENT ────────────────────────────────────────────────────
+  dev)
+    echo "==> [dev] Starting development environment..."
+
+    # Start only the postgres container
+    echo "==> [1/3] Starting PostgreSQL container..."
+    docker compose -f "$ROOT_DIR/docker-compose.yml" up postgres -d
+
+    # Fresh frontend install
+    echo "==> [2/3] Cleaning and reinstalling frontend dependencies..."
+    cd "$ROOT_DIR/frontend"
+    rm -rf node_modules
+    npm install
+
+    # Launch backend + frontend
+    echo "==> [3/3] Starting backend (:8001) and frontend (:3001)..."
+
+    cd "$ROOT_DIR/backend"
+    uvicorn server:app --reload --port 8001 &
+    BACKEND_PID=$!
+
+    cd "$ROOT_DIR/frontend"
+    BROWSER=none npm start &
+    FRONTEND_PID=$!
+
+    # Clean shutdown on Ctrl+C
+    trap "echo ''; echo '==> Shutting down...'; kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit 0" INT TERM
+
+    echo ""
+    echo "  Frontend : http://localhost:3001"
+    echo "  Backend  : http://localhost:8001"
+    echo "  API docs : http://localhost:8001/docs"
+    echo ""
+    echo "Press Ctrl+C to stop."
+
+    wait $BACKEND_PID $FRONTEND_PID
+    ;;
+
+  # ─── PRODUCTION ───────────────────────────────────────────────────────────
+  prod)
+    echo "==> [prod] Building and starting production stack..."
+
+    cd "$ROOT_DIR"
+    docker compose down --remove-orphans
+    docker compose up --build -d
+
+    echo ""
+    echo "  App   : http://localhost:80"
+    echo "  Stack : postgres, backend, frontend, nginx"
+    echo ""
+    echo "Logs: docker compose logs -f"
+    ;;
+
+  *)
+    usage
+    ;;
+esac
