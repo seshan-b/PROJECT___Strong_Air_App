@@ -1,3 +1,23 @@
+// pages/shared/MessagesPage.tsx
+// The internal messaging screen, used by both admins and workers.
+//
+// How messaging works in this app:
+//   - Messages are organised into threads (like email threads). Each thread has
+//     a subject, a list of participants, and a sequence of messages inside it.
+//   - The left panel lists all threads the current user is part of, with an
+//     unread count badge on each. Clicking a thread opens it on the right.
+//   - Opening a thread fetches all messages in that thread and marks them as
+//     read (the backend handles this automatically on fetch).
+//   - The right panel shows the conversation. Your own messages appear on the
+//     right (dark background); others' messages appear on the left (light).
+//   - A reply box at the bottom lets you send a new message to the thread.
+//   - The "New Message" button opens a modal where you pick recipients
+//     (everyone except yourself), write a subject and first message, then send.
+//   - On mobile, the thread list and message detail are shown one at a time,
+//     with a back arrow to return to the list.
+//
+// This single component is shared between /admin/messages and /worker/messages.
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { messagesApi, usersApi } from '../../api/client';
 import { Send, MessageSquare, Plus, ArrowLeft } from 'lucide-react';

@@ -1,3 +1,16 @@
+# routers/analytics_router.py
+# Provides data for the admin dashboard charts and summary stat cards.
+# All endpoints here are admin-only.
+#
+# Endpoint summary:
+#   GET /api/analytics/hours-by-user   — Total hours per worker (bar chart)
+#   GET /api/analytics/hours-by-job    — Total hours per job (bar chart)
+#   GET /api/analytics/hours-over-time — Total hours per day (line chart)
+#   GET /api/analytics/summary         — Counts for the five stat cards on the dashboard
+#
+# All endpoints accept optional start_date / end_date query params (YYYY-MM-DD format).
+# Only completed sessions (clock_out is not null) are counted — active sessions are excluded.
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, cast, Date

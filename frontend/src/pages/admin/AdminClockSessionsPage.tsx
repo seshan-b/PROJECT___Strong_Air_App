@@ -1,3 +1,19 @@
+// pages/admin/AdminClockSessionsPage.tsx
+// A read-only log of all clock-in/out records, accessible only to admins.
+//
+// What it does:
+//   - Loads all clock sessions from the backend and displays them in a table.
+//   - Each row shows: worker name, job name, clock-in time, clock-out time,
+//     duration, and a status badge (Active = still clocked in, Complete = done).
+//   - Filter panel at the top lets the admin narrow results by:
+//       * Worker (dropdown of all verified users)
+//       * Job (dropdown of all jobs)
+//       * Date range (two date pickers — start and end)
+//   - Filters are applied by re-fetching from the backend whenever they change.
+//   - Uses Promise.allSettled so that if one API call fails, the others still
+//     load (e.g. the sessions table still appears even if the jobs list fails).
+//   - Duration is shown as "Xh Ym". Active (still clocked in) sessions show "-".
+
 import React, { useCallback, useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';

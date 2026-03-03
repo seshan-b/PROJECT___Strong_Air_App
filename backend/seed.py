@@ -1,3 +1,12 @@
+# seed.py
+# Populates the database with demo data for development and testing.
+# Run this once after the database is created: python seed.py
+#
+# Creates: 1 Super Admin, 4 verified workers, 1 pending worker,
+# 4 jobs, job assignments, 7 days of clock history, and 2 message threads.
+# Safe to run multiple times — checks if data already exists before inserting.
+# Demo credentials are printed to the console after seeding.
+
 """Seed script to create demo data for Strong Air."""
 import asyncio
 from datetime import datetime, timezone, timedelta

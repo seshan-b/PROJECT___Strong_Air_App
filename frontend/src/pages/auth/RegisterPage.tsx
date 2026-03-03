@@ -1,3 +1,15 @@
+// pages/auth/RegisterPage.tsx
+// The account registration screen for new workers.
+//
+// What it does:
+//   - Collects name, email, username, password, and an optional phone number.
+//   - Calls POST /api/auth/register on submit.
+//   - New accounts are always created with "pending" status — they cannot log in
+//     until an admin approves them. After submitting, the user is sent to
+//     /pending to see a "waiting for approval" message.
+//   - Shows a toggleable show/hide eye button on the password field.
+//   - Displays any error returned by the backend (e.g. email already taken).
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/client';

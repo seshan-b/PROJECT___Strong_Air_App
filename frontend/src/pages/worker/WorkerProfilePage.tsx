@@ -1,3 +1,16 @@
+// pages/worker/WorkerProfilePage.tsx
+// A profile settings page used by both workers and admins.
+//
+// What it does:
+//   - Pre-fills a form with the user's current name, username, email, and phone.
+//   - On save, calls PATCH /api/users/me with only the fields that may have changed.
+//   - On success: calls onUserUpdate so the parent (App.tsx) can update its state
+//     and localStorage with the freshly returned user object. Shows a brief
+//     "Profile updated successfully!" banner, then hides it after 3 seconds.
+//   - On error: shows the error message from the backend (e.g. "Username already taken").
+//   - This component is reused for both the /worker/profile and /admin/profile routes.
+//   - The avatar at the top shows the user's initials (first letter of each name word).
+
 import React, { useState } from 'react';
 import { usersApi } from '../../api/client';
 import { Save } from 'lucide-react';

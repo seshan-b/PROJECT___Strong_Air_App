@@ -1,6 +1,22 @@
+// api/client.ts
+// The single file where all HTTP calls to the backend are defined.
+// Every page in the app imports from here rather than calling axios directly.
+//
+// How it works:
+//   - Creates one axios instance (called "api") with the backend URL as a base.
+//   - A request interceptor automatically attaches the user's access token to
+//     every outgoing request, so individual pages don't have to think about it.
+//   - A response interceptor catches 401 "Unauthorized" errors. When the access
+//     token expires, it silently fetches a new one using the refresh token and
+//     retries the original request. If the refresh also fails, the user is
+//     logged out and sent back to /login.
+//   - The exported objects (authApi, usersApi, jobsApi, etc.) group related
+//     endpoints together so they're easy to find and use.
+
 import axios from 'axios';
 import type { AuthTokens, User, Job, ClockSession, MessageThread, Message, HoursByUser, HoursByJob, HoursOverTime, DashboardSummary } from '../types';
 
+// Use the backend URL set in the .env file, or fall back to the same host (useful in production).
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 const api = axios.create({
@@ -8,7 +24,9 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Interceptor to add auth token
+// Before every request: read the access token from localStorage and add it to the
+// Authorization header. If there's no token, the request goes out without one
+// (and the backend will return a 401 if the route requires login).
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token) {
@@ -17,7 +35,11 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor to handle 401 and refresh
+// After every response: if the server says 401 (token expired or invalid),
+// try to get a new access token using the refresh token.
+//   - _retry flag prevents an infinite loop if the refresh itself also returns 401.
+//   - If refresh succeeds, the original request is retried with the new token.
+//   - If refresh fails (token missing or expired), clear storage and go to login.
 api.interceptors.response.use(
   (response) => response,
   async (error) => {

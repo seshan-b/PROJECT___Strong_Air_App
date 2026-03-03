@@ -1,3 +1,14 @@
+// utils/date.ts
+// Shared date formatting helpers used across pages.
+//
+// Why these exist: JavaScript's built-in date formatting is inconsistent across
+// browsers. These small functions give us a single, predictable format everywhere.
+//
+// Formats used in this app:
+//   dateToApi      → "2024-05-20"          (what the backend expects for date filters)
+//   formatDate     → "20-May-2024"         (human-readable, used in tables and lists)
+//   formatDateTime → "20-May-2024 14:30"   (includes time, for clock session records)
+
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 // Convert a Date object to "yyyy-mm-dd" for API calls

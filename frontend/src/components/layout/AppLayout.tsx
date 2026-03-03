@@ -1,3 +1,16 @@
+// components/layout/AppLayout.tsx
+// The shared page shell used by every protected route (admin and worker alike).
+//
+// What it does:
+//   - Renders the Sidebar on the left and the current page content on the right.
+//   - The Sidebar can be collapsed to a narrow icon-only strip — AppLayout
+//     tracks that state and shifts the main content area accordingly.
+//   - Shows a sticky top header bar with the logged-in user's name and avatar.
+//   - Polls the backend every 30 seconds to get the current unread message count,
+//     then passes that number down to the Sidebar so it can show a badge on the
+//     Messages link.
+//   - Uses React Router's <Outlet /> to render whichever child route is active.
+
 import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';

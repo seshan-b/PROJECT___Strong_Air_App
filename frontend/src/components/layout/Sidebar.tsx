@@ -1,3 +1,17 @@
+// components/layout/Sidebar.tsx
+// The left-hand navigation bar shown on every page after login.
+//
+// What it does:
+//   - Shows different navigation links depending on the user's role.
+//     Admins see: Dashboard, Users, Jobs, Clock Sessions, Messages, Profile.
+//     Workers see: Dashboard, My Hours, Messages, Profile.
+//   - Highlights the currently active link so the user always knows where they are.
+//   - Displays an unread message badge (bubble with a count) on the Messages link
+//     when there are unread messages. Collapses to a small dot when the sidebar
+//     is in icon-only mode.
+//   - Can be toggled between full width (labels visible) and icon-only mode.
+//   - The Logout button clears all stored tokens and redirects to /login.
+
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {

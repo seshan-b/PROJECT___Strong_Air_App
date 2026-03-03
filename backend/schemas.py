@@ -1,10 +1,23 @@
+# schemas.py
+# Defines the shape of data going in (requests) and coming out (responses) for the API.
+#
+# Why this file exists:
+#   - Request schemas validate incoming data before it touches the database.
+#     If a required field is missing or too short, Pydantic rejects it automatically.
+#   - Response schemas control exactly what gets sent back to the frontend.
+#     For example, UserResponse never includes password_hash — it is intentionally excluded.
+#
+# Schemas are grouped by feature: Auth, Users, Jobs, Assignments, Clock, Messages, Analytics.
+
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 from datetime import datetime
 from models import UserRole, UserStatus, JobStatus
 
 
-# ── Auth ──
+# ── Auth ──────────────────────────────────────────────────────────────────────
+
+# Used when a new user signs up. Phone is optional; everything else is required.
 class RegisterRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     email: str = Field(..., min_length=1, max_length=255)
@@ -13,11 +26,14 @@ class RegisterRequest(BaseModel):
     password: str = Field(..., min_length=6)
 
 
+# Used when a user logs in with email and password.
 class LoginRequest(BaseModel):
     email: str
     password: str
 
 
+# Returned after a successful login or token refresh.
+# Includes both tokens and the full user object so the frontend can store the session.
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
@@ -25,11 +41,16 @@ class TokenResponse(BaseModel):
     user: "UserResponse"
 
 
+# Used when the frontend sends a refresh token to get a new access token.
 class RefreshRequest(BaseModel):
     refresh_token: str
 
 
-# ── Users ──
+# ── Users ─────────────────────────────────────────────────────────────────────
+
+# What the API sends back when returning user data.
+# password_hash is intentionally NOT here — we never expose it.
+# is_clocked_in is not stored in the database; it is calculated at query time.
 class UserResponse(BaseModel):
     id: int
     name: str

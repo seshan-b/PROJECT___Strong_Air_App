@@ -1,3 +1,11 @@
+// pages/auth/PendingApprovalPage.tsx
+// A simple holding screen shown after a new user registers.
+//
+// After registration, new accounts have "pending" status and cannot log in yet.
+// This page just tells the user to wait for an admin to approve their account.
+// It has a "Back to Login" link in case they want to try a different account.
+// There is no backend call here — it's a purely informational static page.
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, HardHat } from 'lucide-react';

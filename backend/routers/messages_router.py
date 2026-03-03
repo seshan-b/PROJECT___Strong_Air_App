@@ -1,3 +1,18 @@
+# routers/messages_router.py
+# Handles the inbox and messaging between users.
+#
+# Endpoint summary:
+#   GET  /api/messages/threads               — List all threads the current user is part of
+#   POST /api/messages/threads               — Start a new thread (first message + recipients)
+#   GET  /api/messages/threads/{id}/messages — Load all messages in a thread (marks them as read)
+#   POST /api/messages/threads/{id}/reply    — Reply to a thread
+#   GET  /api/messages/unread-count          — Number of unread messages (drives the sidebar badge)
+#
+# How read/unread works:
+#   Each message has a MessageRecipient row for every person who received it.
+#   is_read starts as False and is set True when the user opens the thread.
+#   The sidebar badge calls /unread-count every 30 seconds to stay up to date.
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_

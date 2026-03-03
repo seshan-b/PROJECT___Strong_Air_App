@@ -1,3 +1,21 @@
+# routers/jobs_router.py
+# Handles all job management and worker assignment endpoints.
+#
+# Endpoint summary:
+#   GET    /api/jobs                    — List all jobs (any logged-in user)
+#   POST   /api/jobs                    — Create a new job (admin only)
+#   GET    /api/jobs/{id}               — Get one job by ID
+#   PATCH  /api/jobs/{id}               — Update title, description, or status (admin only)
+#   DELETE /api/jobs/{id}               — Delete a job — only if no workers are assigned (admin only)
+#   POST   /api/jobs/{id}/assign        — Assign workers to a job (admin only)
+#   DELETE /api/jobs/{id}/assign/{uid}  — Remove a worker from a job (admin only)
+#   GET    /api/jobs/my/assigned        — Get jobs assigned to the currently logged-in worker
+#
+# Business rules enforced here:
+#   - A job cannot be archived while any worker is actively clocked in on it.
+#   - A job cannot be deleted while workers are still assigned.
+#   - A worker cannot be unassigned while they are clocked in on that job.
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select

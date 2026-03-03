@@ -1,3 +1,16 @@
+// pages/auth/LoginPage.tsx
+// The login screen. This is the first page most users see.
+//
+// What it does:
+//   - Accepts an email and password, then calls POST /api/auth/login.
+//   - On success: saves the access token, refresh token, and user object to
+//     localStorage, then tells the parent (App.tsx) who logged in via onLoginSuccess.
+//     The parent then redirects to the correct dashboard based on role.
+//   - On failure: shows the error message returned by the backend.
+//   - Has a show/hide toggle on the password field (the eye icon).
+//   - If the user is already logged in, App.tsx redirects away before this page
+//     even renders, so no need to handle that case here.
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/client';

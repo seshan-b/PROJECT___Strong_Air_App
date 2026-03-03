@@ -1,3 +1,19 @@
+// pages/admin/AdminJobsPage.tsx
+// The job management page, accessible only to admins.
+//
+// What it does:
+//   - Shows all jobs (both active and archived) as cards in a grid.
+//   - Each card shows the job title, description, assigned workers, and action buttons.
+//   - Create / Edit: a modal form lets the admin name and describe jobs.
+//   - Archive: moves a job to "archived" status. Blocked if a worker is currently
+//     clocked in to that job (button is disabled with a tooltip explaining why).
+//   - Unarchive: restores an archived job back to "active".
+//   - Delete: removes the job permanently. Only allowed when no workers are assigned.
+//   - Assign Workers: opens a modal with checkboxes for all verified workers.
+//     Saving replaces the entire assignment list for that job.
+//   - Unassign: the X button next to a worker name removes just that one worker.
+//     Shows an error banner if the backend rejects it (e.g. worker is clocked in).
+
 import React, { useEffect, useState } from 'react';
 import { jobsApi, usersApi } from '../../api/client';
 import { Plus, Users, Edit2, Archive, ArchiveRestore, Trash2, X } from 'lucide-react';

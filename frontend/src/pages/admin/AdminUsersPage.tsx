@@ -1,3 +1,21 @@
+// pages/admin/AdminUsersPage.tsx
+// The user management page, accessible only to admins.
+//
+// What it does:
+//   - Lists all users with their name, email, role, and status.
+//   - Filter bar lets the admin narrow the list by status: all, pending,
+//     verified, or suspended. A search box further filters by name or email.
+//   - Pending users show Approve (green check) and Reject (red X) buttons.
+//   - Verified workers can be Suspended (disabled if the worker is clocked in).
+//   - Suspended workers can be Reactivated.
+//   - Workers (not admins) can be Deleted, but only after being suspended first.
+//   - Role badges are clickable buttons that toggle a user's role between
+//     Worker and Super Admin — except for the currently logged-in admin
+//     (to prevent accidental self-demotion).
+//
+// currentUserId is fetched on load via GET /api/auth/me so the role toggle
+// button can be hidden on the logged-in user's own row.
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { usersApi, authApi } from '../../api/client';
 import { Check, X, Search, Trash2 } from 'lucide-react';

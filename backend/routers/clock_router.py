@@ -1,3 +1,17 @@
+# routers/clock_router.py
+# Handles clocking in and out for workers.
+#
+# Endpoint summary:
+#   POST /api/clock/in       — Clock a worker in on a specific job
+#   POST /api/clock/out      — Clock the current worker out (no body needed)
+#   GET  /api/clock/active   — Check if the current user is clocked in right now
+#   GET  /api/clock/sessions — List clock sessions with optional filters
+#
+# Business rules enforced here:
+#   - Worker must be assigned to the job before clocking in.
+#   - Worker cannot clock in to a second job while already clocked in somewhere.
+#   - Workers see only their own sessions. Admins can filter by any worker or job.
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_

@@ -1,3 +1,16 @@
+// pages/worker/WorkerHoursPage.tsx
+// A personal hours log that workers use to review their own clock sessions.
+//
+// What it does:
+//   - Fetches all clock sessions belonging to the logged-in worker from the backend.
+//   - Displays each session as a card: job name, clock-in and clock-out times,
+//     and duration formatted as "Xh Ym". In-progress sessions show "In Progress"
+//     instead of a duration.
+//   - A summary card at the top shows total hours and number of completed sessions
+//     across the currently filtered date range.
+//   - Two date pickers (start and end) let the worker filter by date range.
+//     Changing either date triggers a new fetch automatically (via useCallback).
+
 import React, { useCallback, useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';

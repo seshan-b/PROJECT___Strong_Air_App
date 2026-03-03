@@ -1,3 +1,8 @@
+// types/index.ts
+// Central place for all TypeScript types used across the frontend.
+// These mirror the response shapes from the backend (see backend/schemas.py).
+// If a new field is added to a backend response, add it here too.
+
 export type UserRole = 'superadmin' | 'user';
 export type UserStatus = 'pending' | 'verified' | 'suspended';
 export type JobStatus = 'active' | 'archived';

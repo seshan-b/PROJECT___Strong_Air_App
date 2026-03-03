@@ -1,3 +1,12 @@
+# routers/auth_router.py
+# Handles all authentication endpoints: register, login, token refresh, and "who am I".
+#
+# Endpoint summary:
+#   POST /api/auth/register  — Create a new account (starts as "pending", needs admin approval)
+#   POST /api/auth/login     — Log in with email + password, receive two tokens
+#   POST /api/auth/refresh   — Exchange a refresh token for a new access token
+#   GET  /api/auth/me        — Return the currently logged-in user's data
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -22,6 +31,7 @@ async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username already taken")
 
+    # New accounts always start as "pending" — an admin must approve them before they can log in.
     user = User(
         name=req.name,
         email=req.email,
@@ -41,6 +51,8 @@ async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
 async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == req.email))
     user = result.scalar_one_or_none()
+    # Return the same generic error whether the email is wrong or the password is wrong.
+    # This prevents an attacker from figuring out which emails are registered.
     if not user or not verify_password(req.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 

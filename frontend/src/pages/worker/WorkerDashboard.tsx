@@ -1,3 +1,18 @@
+// pages/worker/WorkerDashboard.tsx
+// The main screen workers see after logging in.
+//
+// What it does:
+//   - Shows the worker's assigned jobs as a list of selectable buttons.
+//   - If the worker is not clocked in: they pick a job and press "Clock In".
+//   - If the worker is clocked in: shows a live timer counting up from when
+//     they clocked in, plus a "Clock Out" button to end the session.
+//   - The timer ticks every second using setInterval and clears itself when
+//     the session ends or the component unmounts.
+//   - Two quick-stat cards at the bottom show how many jobs are assigned and
+//     how many unread messages the worker has.
+//   - On load, fetches: assigned jobs, current active session, and unread count.
+//     All three calls run in parallel with Promise.all.
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { jobsApi, clockApi, messagesApi } from '../../api/client';
 import { Play, Square, Clock, Briefcase, MessageSquare } from 'lucide-react';

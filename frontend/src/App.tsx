@@ -1,3 +1,17 @@
+// App.tsx
+// The root component of the frontend. Owns the logged-in user state and all routing.
+//
+// How authentication works on the frontend:
+//   - On load, checks localStorage for a saved user + access_token.
+//   - If both exist, the user is considered logged in and sees their role-specific routes.
+//   - If not found, every route redirects to /login.
+//   - handleUserUpdate syncs profile changes to both React state and localStorage immediately.
+//
+// Route groups:
+//   Public  — /login, /register, /pending  (no login required)
+//   Admin   — /admin/*  (only when user.role === 'superadmin')
+//   Worker  — /worker/* (only when user.role === 'user')
+
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import type { User } from './types';
