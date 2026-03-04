@@ -1,9 +1,27 @@
+# routers/jobs_router.py
+# Handles all job management and worker assignment endpoints.
+#
+# Endpoint summary:
+#   GET    /api/jobs                    — List all jobs (any logged-in user)
+#   POST   /api/jobs                    — Create a new job (admin only)
+#   GET    /api/jobs/{id}               — Get one job by ID
+#   PATCH  /api/jobs/{id}               — Update title, description, or status (admin only)
+#   DELETE /api/jobs/{id}               — Delete a job — only if no workers are assigned (admin only)
+#   POST   /api/jobs/{id}/assign        — Assign workers to a job (admin only)
+#   DELETE /api/jobs/{id}/assign/{uid}  — Remove a worker from a job (admin only)
+#   GET    /api/jobs/my/assigned        — Get jobs assigned to the currently logged-in worker
+#
+# Business rules enforced here:
+#   - A job cannot be archived while any worker is actively clocked in on it.
+#   - A job cannot be deleted while workers are still assigned.
+#   - A worker cannot be unassigned while they are clocked in on that job.
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from database import get_db
-from models import Job, JobAssignment, User, UserRole, JobStatus
+from models import Job, JobAssignment, ClockSession, User, UserRole, JobStatus
 from schemas import JobCreateRequest, JobUpdateRequest, JobResponse, UserResponse, AssignmentRequest, AssignmentResponse
 from auth import get_current_user, require_role, require_verified
 from typing import List
@@ -33,14 +51,26 @@ async def list_jobs(
         assigned_users = [
             UserResponse.model_validate(a.user) for a in assignments.scalars().all()
         ]
+        # Check for any active clock session on this job
+        active_result = await db.execute(
+            select(ClockSession).where(
+                ClockSession.job_id == job.id,
+                ClockSession.clock_out.is_(None),
+            )
+        )
+        has_active_session = active_result.scalar_one_or_none() is not None
         job_dict = JobResponse(
             id=job.id,
             title=job.title,
             description=job.description,
             image_url=job.image_url,
+            location=job.location,
+            latitude=job.latitude,
+            longitude=job.longitude,
             status=job.status.value if isinstance(job.status, JobStatus) else job.status,
             created_at=job.created_at,
             assigned_users=assigned_users,
+            has_active_session=has_active_session,
         )
         response.append(job_dict)
     return response
@@ -52,7 +82,7 @@ async def create_job(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
-    job = Job(title=req.title, description=req.description, image_url=req.image_url)
+    job = Job(title=req.title, description=req.description, image_url=req.image_url, location=req.location, latitude=req.latitude, longitude=req.longitude)
     db.add(job)
     await db.commit()
     await db.refresh(job)
@@ -61,6 +91,9 @@ async def create_job(
         title=job.title,
         description=job.description,
         image_url=job.image_url,
+        location=job.location,
+        latitude=job.latitude,
+        longitude=job.longitude,
         status=job.status.value if isinstance(job.status, JobStatus) else job.status,
         created_at=job.created_at,
         assigned_users=[],
@@ -86,6 +119,9 @@ async def get_job(
         title=job.title,
         description=job.description,
         image_url=job.image_url,
+        location=job.location,
+        latitude=job.latitude,
+        longitude=job.longitude,
         status=job.status.value if isinstance(job.status, JobStatus) else job.status,
         created_at=job.created_at,
         assigned_users=assigned_users,
@@ -103,12 +139,33 @@ async def update_job(
     job = result.scalar_one_or_none()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+
+    # Block archiving if a worker is currently clocked in
+    if req.status == 'archived':
+        active_result = await db.execute(
+            select(ClockSession).where(
+                ClockSession.job_id == job_id,
+                ClockSession.clock_out.is_(None),
+            )
+        )
+        if active_result.scalar_one_or_none():
+            raise HTTPException(
+                status_code=409,
+                detail="Cannot archive a job while a worker is currently clocked in.",
+            )
+
     if req.title is not None:
         job.title = req.title
     if req.description is not None:
         job.description = req.description
     if req.image_url is not None:
         job.image_url = req.image_url
+    if req.location is not None:
+        job.location = req.location
+    if req.latitude is not None:
+        job.latitude = req.latitude
+    if req.longitude is not None:
+        job.longitude = req.longitude
     if req.status is not None:
         job.status = req.status
     await db.commit()
@@ -118,10 +175,39 @@ async def update_job(
         title=job.title,
         description=job.description,
         image_url=job.image_url,
+        location=job.location,
+        latitude=job.latitude,
+        longitude=job.longitude,
         status=job.status.value if isinstance(job.status, JobStatus) else job.status,
         created_at=job.created_at,
         assigned_users=[],
     )
+
+
+@router.delete("/{job_id}")
+async def delete_job(
+    job_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(UserRole.superadmin)),
+):
+    result = await db.execute(select(Job).where(Job.id == job_id))
+    job = result.scalar_one_or_none()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    # Block deletion if any workers are assigned
+    assignments_result = await db.execute(
+        select(JobAssignment).where(JobAssignment.job_id == job_id)
+    )
+    if assignments_result.scalars().first():
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete a job with assigned workers. Remove all workers first.",
+        )
+
+    await db.delete(job)
+    await db.commit()
+    return {"detail": "Job deleted"}
 
 
 @router.post("/{job_id}/assign", response_model=List[AssignmentResponse])
@@ -174,6 +260,20 @@ async def unassign_user(
     assignment = result.scalar_one_or_none()
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
+
+    active_session = await db.execute(
+        select(ClockSession).where(
+            ClockSession.user_id == user_id,
+            ClockSession.job_id == job_id,
+            ClockSession.clock_out.is_(None),
+        )
+    )
+    if active_session.scalar_one_or_none():
+        raise HTTPException(
+            status_code=409,
+            detail="Worker is currently clocked in on this job. They must clock out before being removed.",
+        )
+
     await db.delete(assignment)
     await db.commit()
     return {"detail": "User unassigned"}
@@ -199,6 +299,9 @@ async def my_assigned_jobs(
                     title=job.title,
                     description=job.description,
                     image_url=job.image_url,
+                    location=job.location,
+                    latitude=job.latitude,
+                    longitude=job.longitude,
                     status=job.status.value if isinstance(job.status, JobStatus) else job.status,
                     created_at=job.created_at,
                     assigned_users=[],

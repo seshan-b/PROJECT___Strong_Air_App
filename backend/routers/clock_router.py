@@ -1,3 +1,17 @@
+# routers/clock_router.py
+# Handles clocking in and out for workers.
+#
+# Endpoint summary:
+#   POST /api/clock/in       — Clock a worker in on a specific job
+#   POST /api/clock/out      — Clock the current worker out (no body needed)
+#   GET  /api/clock/active   — Check if the current user is clocked in right now
+#   GET  /api/clock/sessions — List clock sessions with optional filters
+#
+# Business rules enforced here:
+#   - Worker must be assigned to the job before clocking in.
+#   - Worker cannot clock in to a second job while already clocked in somewhere.
+#   - Workers see only their own sessions. Admins can filter by any worker or job.
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
@@ -5,7 +19,7 @@ from database import get_db
 from models import ClockSession, JobAssignment, User, UserRole, UserStatus
 from schemas import ClockInRequest, ClockSessionResponse
 from auth import get_current_user, require_role
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 
 router = APIRouter(prefix="/api/clock", tags=["clock"])
@@ -137,9 +151,12 @@ async def list_sessions(
     if job_id:
         query = query.where(ClockSession.job_id == job_id)
     if start_date:
-        query = query.where(ClockSession.clock_in >= start_date)
+        start_dt = datetime.strptime(start_date, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+        query = query.where(ClockSession.clock_in >= start_dt)
     if end_date:
-        query = query.where(ClockSession.clock_in <= end_date)
+        # Include the full end day by using the start of the following day
+        end_dt = datetime.strptime(end_date, '%Y-%m-%d').replace(tzinfo=timezone.utc) + timedelta(days=1)
+        query = query.where(ClockSession.clock_in < end_dt)
 
     query = query.order_by(ClockSession.clock_in.desc())
     result = await db.execute(query)

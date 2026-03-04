@@ -1,4 +1,19 @@
-import React, { useEffect, useState } from 'react';
+// pages/admin/AdminDashboard.tsx
+// The main analytics overview page visible only to admins.
+//
+// What it shows:
+//   - Five stat cards at the top: total hours, total users, pending approvals,
+//     active jobs, and workers currently clocked in.
+//   - Three charts: hours broken down by worker, hours broken down by job,
+//     and total hours logged over time (line chart).
+//   - A date range filter (start/end date inputs) that re-fetches all four
+//     analytics endpoints whenever the dates change.
+//
+// All data comes from the /api/analytics/* endpoints.
+// StatCard and CustomTooltip are small helper components defined in this file
+// to keep the chart and card rendering code clean and readable.
+
+import React, { useCallback, useEffect, useState } from 'react';
 import { analyticsApi } from '../../api/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Users, Briefcase, Clock, UserPlus, Activity } from 'lucide-react';
@@ -35,7 +50,7 @@ const AdminDashboard: React.FC = () => {
   const [hoursOverTime, setHoursOverTime] = useState<HoursOverTime[]>([]);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const params = {
         start_date: dateRange.start || undefined,
@@ -54,9 +69,9 @@ const AdminDashboard: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch analytics:', err);
     }
-  };
+  }, [dateRange]);
 
-  useEffect(() => { fetchData(); }, [dateRange]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   return (
     <div className="animate-fade-in" data-testid="admin-dashboard">

@@ -1,23 +1,46 @@
+// pages/auth/RegisterPage.tsx
+// The account registration screen for new workers.
+//
+// What it does:
+//   - Collects name, email, username, password, and an optional phone number.
+//   - Calls POST /api/auth/register on submit.
+//   - New accounts are always created with "pending" status — they cannot log in
+//     until an admin approves them. After submitting, the user is sent to
+//     /pending to see a "waiting for approval" message.
+//   - Shows a toggleable show/hide eye button on the password field.
+//   - Displays any error returned by the backend (e.g. email already taken).
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/client';
-import { HardHat } from 'lucide-react';
+import { HardHat, Eye, EyeOff } from 'lucide-react';
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', username: '', password: '', phone: '' });
+  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!/^[a-z0-9_-]+$/.test(form.username)) {
+      setError('Username can only contain lowercase letters (a-z), numbers, hyphens and underscores.');
+      return;
+    }
+
     setLoading(true);
     try {
       await authApi.register(form);
       navigate('/pending');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Registration failed');
+      const detail = err.response?.data?.detail;
+      const message = Array.isArray(detail)
+        ? detail.map((e: any) => e.msg).join(' · ')
+        : detail || 'Registration failed';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -96,16 +119,25 @@ const RegisterPage: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-primary-700 mb-1.5">Password</label>
-              <input
-                data-testid="register-password-input"
-                type="password"
-                value={form.password}
-                onChange={(e) => updateField('password', e.target.value)}
-                className="w-full h-11 px-4 rounded-md border border-primary-200 bg-white text-primary-900 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-                placeholder="Min 6 characters"
-                required
-                minLength={6}
-              />
+              <div className="relative">
+                <input
+                  data-testid="register-password-input"
+                  type={showPass ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(e) => updateField('password', e.target.value)}
+                  className="w-full h-11 px-4 pr-11 rounded-md border border-primary-200 bg-white text-primary-900 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                  placeholder="Min 6 characters"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 hover:text-primary-600"
+                >
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             <button
               data-testid="register-submit-button"

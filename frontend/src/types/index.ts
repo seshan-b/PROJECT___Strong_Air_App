@@ -1,3 +1,8 @@
+// types/index.ts
+// Central place for all TypeScript types used across the frontend.
+// These mirror the response shapes from the backend (see backend/schemas.py).
+// If a new field is added to a backend response, add it here too.
+
 export type UserRole = 'superadmin' | 'user';
 export type UserStatus = 'pending' | 'verified' | 'suspended';
 export type JobStatus = 'active' | 'archived';
@@ -11,6 +16,8 @@ export interface User {
   role: UserRole;
   status: UserStatus;
   created_at: string;
+  is_clocked_in?: boolean;
+  is_active_session?: boolean;
 }
 
 export interface AuthTokens {
@@ -25,9 +32,13 @@ export interface Job {
   title: string;
   description: string | null;
   image_url: string | null;
+  location: string | null;
+  latitude: number | null;
+  longitude: number | null;
   status: JobStatus;
   created_at: string;
   assigned_users?: User[];
+  has_active_session?: boolean;
 }
 
 export interface ClockSession {

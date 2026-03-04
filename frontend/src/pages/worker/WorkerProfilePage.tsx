@@ -1,6 +1,19 @@
+// pages/worker/WorkerProfilePage.tsx
+// A profile settings page used by both workers and admins.
+//
+// What it does:
+//   - Pre-fills a form with the user's current name, username, email, and phone.
+//   - On save, calls PATCH /api/users/me with only the fields that may have changed.
+//   - On success: calls onUserUpdate so the parent (App.tsx) can update its state
+//     and localStorage with the freshly returned user object. Shows a brief
+//     "Profile updated successfully!" banner, then hides it after 3 seconds.
+//   - On error: shows the error message from the backend (e.g. "Username already taken").
+//   - This component is reused for both the /worker/profile and /admin/profile routes.
+//   - The avatar at the top shows the user's initials (first letter of each name word).
+
 import React, { useState } from 'react';
 import { usersApi } from '../../api/client';
-import { UserCircle, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import type { User } from '../../types';
 
 interface WorkerProfileProps {
@@ -9,7 +22,7 @@ interface WorkerProfileProps {
 }
 
 const WorkerProfilePage: React.FC<WorkerProfileProps> = ({ user, onUserUpdate }) => {
-  const [form, setForm] = useState({ name: user.name, phone: user.phone || '', email: user.email });
+  const [form, setForm] = useState({ name: user.name, phone: user.phone || '', email: user.email, username: user.username });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -19,13 +32,19 @@ const WorkerProfilePage: React.FC<WorkerProfileProps> = ({ user, onUserUpdate })
     setSaving(true);
     setError('');
     setSuccess(false);
+    if (!/^[a-z0-9_-]+$/.test(form.username)) {
+      setError('Username can only contain lowercase letters (a-z), numbers, hyphens and underscores.');
+      setSaving(false);
+      return;
+    }
     try {
       const res = await usersApi.updateProfile(form);
       onUserUpdate(res.data);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Update failed');
+      const detail = err.response?.data?.detail;
+      setError(Array.isArray(detail) ? detail.map((e: any) => e.msg).join(' · ') : detail || 'Update failed');
     }
     setSaving(false);
   };
@@ -70,6 +89,16 @@ const WorkerProfilePage: React.FC<WorkerProfileProps> = ({ user, onUserUpdate })
               type="text"
               value={form.name}
               onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))}
+              className="w-full h-10 px-4 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-primary-700 mb-1.5">Username</label>
+            <input
+              data-testid="profile-username-input"
+              type="text"
+              value={form.username}
+              onChange={(e) => setForm(p => ({ ...p, username: e.target.value }))}
               className="w-full h-10 px-4 rounded-md border border-primary-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
             />
           </div>

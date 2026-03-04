@@ -1,23 +1,39 @@
+# schemas.py
+# Defines the shape of data going in (requests) and coming out (responses) for the API.
+#
+# Why this file exists:
+#   - Request schemas validate incoming data before it touches the database.
+#     If a required field is missing or too short, Pydantic rejects it automatically.
+#   - Response schemas control exactly what gets sent back to the frontend.
+#     For example, UserResponse never includes password_hash — it is intentionally excluded.
+#
+# Schemas are grouped by feature: Auth, Users, Jobs, Assignments, Clock, Messages, Analytics.
+
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 from datetime import datetime
 from models import UserRole, UserStatus, JobStatus
 
 
-# ── Auth ──
+# ── Auth ──────────────────────────────────────────────────────────────────────
+
+# Used when a new user signs up. Phone is optional; everything else is required.
 class RegisterRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     email: str = Field(..., min_length=1, max_length=255)
     phone: Optional[str] = None
-    username: str = Field(..., min_length=3, max_length=100)
+    username: str = Field(..., min_length=4, max_length=25, pattern=r"^[a-z0-9_-]+$")
     password: str = Field(..., min_length=6)
 
 
+# Used when a user logs in with email and password.
 class LoginRequest(BaseModel):
     email: str
     password: str
 
 
+# Returned after a successful login or token refresh.
+# Includes both tokens and the full user object so the frontend can store the session.
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
@@ -25,11 +41,16 @@ class TokenResponse(BaseModel):
     user: "UserResponse"
 
 
+# Used when the frontend sends a refresh token to get a new access token.
 class RefreshRequest(BaseModel):
     refresh_token: str
 
 
-# ── Users ──
+# ── Users ─────────────────────────────────────────────────────────────────────
+
+# What the API sends back when returning user data.
+# password_hash is intentionally NOT here — we never expose it.
+# is_clocked_in is not stored in the database; it is calculated at query time.
 class UserResponse(BaseModel):
     id: int
     name: str
@@ -39,6 +60,8 @@ class UserResponse(BaseModel):
     role: str
     status: str
     created_at: datetime
+    is_clocked_in: bool = False
+    is_active_session: bool = False
 
     class Config:
         from_attributes = True
@@ -48,10 +71,15 @@ class UserUpdateRequest(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
+    username: Optional[str] = Field(None, min_length=4, max_length=25, pattern=r"^[a-z0-9_-]+$")
 
 
 class ApproveUserRequest(BaseModel):
     status: str  # verified or suspended
+
+
+class ChangeRoleRequest(BaseModel):
+    role: str  # user or superadmin
 
 
 # ── Jobs ──
@@ -59,6 +87,9 @@ class JobCreateRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
     image_url: Optional[str] = None
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class JobUpdateRequest(BaseModel):
@@ -66,6 +97,9 @@ class JobUpdateRequest(BaseModel):
     description: Optional[str] = None
     image_url: Optional[str] = None
     status: Optional[str] = None
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class JobResponse(BaseModel):
@@ -73,9 +107,13 @@ class JobResponse(BaseModel):
     title: str
     description: Optional[str] = None
     image_url: Optional[str] = None
+    location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     status: str
     created_at: datetime
     assigned_users: Optional[List[UserResponse]] = None
+    has_active_session: bool = False
 
     class Config:
         from_attributes = True

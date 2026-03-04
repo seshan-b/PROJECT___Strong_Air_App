@@ -1,6 +1,21 @@
+// App.tsx
+// The root component of the frontend. Owns the logged-in user state and all routing.
+//
+// How authentication works on the frontend:
+//   - On load, checks localStorage for a saved user + access_token.
+//   - If both exist, the user is considered logged in and sees their role-specific routes.
+//   - If not found, every route redirects to /login.
+//   - handleUserUpdate syncs profile changes to both React state and localStorage immediately.
+//
+// Route groups:
+//   Public  — /login, /register, /pending  (no login required)
+//   Admin   — /admin/*  (only when user.role === 'superadmin')
+//   Worker  — /worker/* (only when user.role === 'user')
+
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import type { User } from './types';
+import { authApi } from './api/client';
 import AppLayout from './components/layout/AppLayout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
@@ -36,6 +51,12 @@ const App: React.FC = () => {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  const handleLogout = async () => {
+    try { await authApi.logout(); } catch { /* best-effort */ }
+    localStorage.clear();
+    setUser(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-primary-50">
@@ -57,18 +78,19 @@ const App: React.FC = () => {
 
         {/* Admin Routes */}
         {isAdmin && (
-          <Route element={<AppLayout user={user} />}>
+          <Route element={<AppLayout user={user} onLogout={handleLogout} />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/jobs" element={<AdminJobsPage />} />
             <Route path="/admin/clock-sessions" element={<AdminClockSessionsPage />} />
             <Route path="/admin/messages" element={<MessagesPage currentUser={user} />} />
+            <Route path="/admin/profile" element={<WorkerProfilePage user={user} onUserUpdate={handleUserUpdate} />} />
           </Route>
         )}
 
         {/* Worker Routes */}
         {isWorker && (
-          <Route element={<AppLayout user={user} />}>
+          <Route element={<AppLayout user={user} onLogout={handleLogout} />}>
             <Route path="/worker/dashboard" element={<WorkerDashboard user={user} />} />
             <Route path="/worker/hours" element={<WorkerHoursPage />} />
             <Route path="/worker/messages" element={<MessagesPage currentUser={user} />} />

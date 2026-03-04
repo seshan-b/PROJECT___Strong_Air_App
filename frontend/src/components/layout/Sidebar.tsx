@@ -1,38 +1,59 @@
+// components/layout/Sidebar.tsx
+// The left-hand navigation bar shown on every page after login.
+//
+// What it does:
+//   - Shows different navigation links depending on the user's role.
+//     Admins see: Dashboard, Users, Jobs, Clock Sessions, Messages, Profile.
+//     Workers see: Dashboard, My Hours, Messages, Profile.
+//   - Highlights the currently active link so the user always knows where they are.
+//   - Displays an unread message badge (bubble with a count) on the Messages link
+//     when there are unread messages. Collapses to a small dot when the sidebar
+//     is in icon-only mode.
+//   - Can be toggled between full width (labels visible) and icon-only mode.
+//   - The Logout button clears all stored tokens and redirects to /login.
+
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, Users, Briefcase, Clock, MessageSquare, 
-  LogOut, Shield, ChevronLeft, ChevronRight, HardHat
+import { NavLink } from 'react-router-dom';
+import {
+  LayoutDashboard, Users, Briefcase, Clock, MessageSquare,
+  LogOut, Shield, ChevronLeft, ChevronRight, HardHat, UserCircle
 } from 'lucide-react';
+
+interface SidebarLink {
+  to: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  badge?: number;
+}
 
 interface SidebarProps {
   role: 'superadmin' | 'user';
   collapsed: boolean;
   onToggle: () => void;
+  unreadCount?: number;
+  onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle }) => {
-  const navigate = useNavigate();
-
+const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle, unreadCount = 0, onLogout }) => {
   const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
+    onLogout();
   };
 
   const isAdmin = role === 'superadmin';
 
-  const adminLinks = [
+  const adminLinks: SidebarLink[] = [
     { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/admin/users', icon: Users, label: 'Users' },
     { to: '/admin/jobs', icon: Briefcase, label: 'Jobs' },
     { to: '/admin/clock-sessions', icon: Clock, label: 'Clock Sessions' },
-    { to: '/admin/messages', icon: MessageSquare, label: 'Messages' },
+    { to: '/admin/messages', icon: MessageSquare, label: 'Messages', badge: unreadCount },
+    { to: '/admin/profile', icon: UserCircle, label: 'Profile' },
   ];
 
-  const workerLinks = [
+  const workerLinks: SidebarLink[] = [
     { to: '/worker/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/worker/hours', icon: Clock, label: 'My Hours' },
-    { to: '/worker/messages', icon: MessageSquare, label: 'Messages' },
+    { to: '/worker/messages', icon: MessageSquare, label: 'Messages', badge: unreadCount },
     { to: '/worker/profile', icon: Users, label: 'Profile' },
   ];
 
@@ -76,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle }) => {
             to={link.to}
             data-testid={`nav-${link.label.toLowerCase().replace(/\s/g, '-')}`}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 mx-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              `relative flex items-center gap-3 px-4 py-3 mx-2 rounded-md text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? 'bg-primary-800 text-white border-l-4 border-accent -ml-0.5'
                   : 'text-primary-400 hover:text-white hover:bg-primary-800/50'
@@ -84,7 +105,15 @@ const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle }) => {
             }
           >
             <link.icon size={20} className="flex-shrink-0" />
-            {!collapsed && <span>{link.label}</span>}
+            {!collapsed && <span className="flex-1">{link.label}</span>}
+            {!collapsed && link.badge && link.badge > 0 ? (
+              <span className="bg-accent text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                {link.badge > 99 ? '99+' : link.badge}
+              </span>
+            ) : null}
+            {collapsed && link.badge && link.badge > 0 ? (
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-primary-900" />
+            ) : null}
           </NavLink>
         ))}
       </nav>
@@ -94,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle }) => {
         <button
           data-testid="sidebar-toggle"
           onClick={onToggle}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-primary-400 hover:text-white hover:bg-primary-800/50 rounded-md transition-colors text-sm"
+          className="hidden md:flex w-full items-center justify-center gap-2 px-3 py-2 text-primary-400 hover:text-white hover:bg-primary-800/50 rounded-md transition-colors text-sm"
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           {!collapsed && <span>Collapse</span>}
