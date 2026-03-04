@@ -5,8 +5,9 @@ from database import get_db
 from models import User, UserRole, UserStatus, ClockSession, JobAssignment
 from sqlalchemy import delete
 from schemas import UserResponse, UserUpdateRequest, ApproveUserRequest, ChangeRoleRequest
-from auth import get_current_user, require_role, hash_password
+from auth import get_current_user, require_role, require_verified, hash_password
 from typing import List
+from datetime import datetime, timezone, timedelta
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -32,10 +33,31 @@ async def list_users(
     )
     active_user_ids = set(active_result.scalars().all())
 
+    # A user is considered to have an active session if they logged in or refreshed within the last 35 minutes
+    # (access tokens last 30 min; 5-minute buffer for overlap)
+    session_cutoff = datetime.now(timezone.utc) - timedelta(minutes=35)
+
     return [
-        UserResponse.model_validate(u).model_copy(update={"is_clocked_in": u.id in active_user_ids})
+        UserResponse.model_validate(u).model_copy(update={
+            "is_clocked_in": u.id in active_user_ids,
+            "is_active_session": (
+                u.last_active_at is not None and u.last_active_at > session_cutoff
+            ),
+        })
         for u in users
     ]
+
+
+@router.get("/directory", response_model=List[UserResponse])
+async def user_directory(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """All verified users — accessible to any authenticated user for messaging."""
+    result = await db.execute(
+        select(User).where(User.status == UserStatus.verified).order_by(User.name.asc())
+    )
+    return result.scalars().all()
 
 
 @router.get("/pending", response_model=List[UserResponse])

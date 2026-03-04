@@ -20,7 +20,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { messagesApi, usersApi } from '../../api/client';
-import { Send, MessageSquare, Plus, ArrowLeft } from 'lucide-react';
+import { Send, MessageSquare, Plus, ArrowLeft, Trash2 } from 'lucide-react';
 import { formatDate, formatDateTime } from '../../utils/date';
 import type { MessageThread, Message, User } from '../../types';
 
@@ -46,12 +46,18 @@ const MessagesPage: React.FC<MessagesPageProps> = ({ currentUser }) => {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await usersApi.list({ status: 'verified' });
+      const res = await usersApi.directory();
       setUsers(res.data.filter(u => u.id !== currentUser.id));
     } catch (err) { console.error(err); }
   }, [currentUser.id]);
 
-  useEffect(() => { fetchThreads(); fetchUsers(); }, [fetchThreads, fetchUsers]);
+  useEffect(() => {
+    fetchThreads();
+    fetchUsers();
+    // Poll for new threads every 30 seconds so the list stays current without a manual refresh
+    const interval = setInterval(fetchThreads, 30000);
+    return () => clearInterval(interval);
+  }, [fetchThreads, fetchUsers]);
 
   const openThread = async (threadId: number) => {
     setSelectedThread(threadId);
@@ -83,6 +89,18 @@ const MessagesPage: React.FC<MessagesPageProps> = ({ currentUser }) => {
     } catch (err) { console.error(err); }
   };
 
+  const handleDeleteThread = async (e: React.MouseEvent, threadId: number) => {
+    e.stopPropagation();
+    try {
+      await messagesApi.deleteThread(threadId);
+      if (selectedThread === threadId) {
+        setSelectedThread(null);
+        setMessages([]);
+      }
+      fetchThreads();
+    } catch (err) { console.error(err); }
+  };
+
   const totalUnread = threads.reduce((sum, t) => sum + t.unread_count, 0);
 
   return (
@@ -107,27 +125,39 @@ const MessagesPage: React.FC<MessagesPageProps> = ({ currentUser }) => {
         {/* Thread List */}
         <div className={`border-r border-primary-200 overflow-y-auto ${selectedThread ? 'hidden md:block w-80' : 'w-full md:w-80'}`}>
           {threads.map((thread) => (
-            <button
+            <div
               key={thread.id}
-              data-testid={`thread-${thread.id}`}
-              onClick={() => openThread(thread.id)}
-              className={`w-full text-left px-4 py-4 border-b border-primary-100 hover:bg-primary-50 transition-colors ${
+              className={`group relative border-b border-primary-100 ${
                 selectedThread === thread.id ? 'bg-accent/5 border-l-4 border-l-accent' : ''
               }`}
             >
-              <div className="flex items-start justify-between">
-                <p className="font-medium text-sm text-primary-900 truncate pr-2">{thread.subject || 'No subject'}</p>
-                {thread.unread_count > 0 && (
-                  <span className="bg-accent text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0" data-testid={`unread-badge-${thread.id}`}>
-                    {thread.unread_count}
-                  </span>
+              <button
+                data-testid={`thread-${thread.id}`}
+                onClick={() => openThread(thread.id)}
+                className="w-full text-left px-4 py-4 hover:bg-primary-50 transition-colors pr-10"
+              >
+                <div className="flex items-start justify-between">
+                  <p className="font-medium text-sm text-primary-900 truncate pr-2">{thread.subject || 'No subject'}</p>
+                  {thread.unread_count > 0 && (
+                    <span className="bg-accent text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0" data-testid={`unread-badge-${thread.id}`}>
+                      {thread.unread_count}
+                    </span>
+                  )}
+                </div>
+                {thread.last_message && (
+                  <p className="text-xs text-primary-400 mt-1 truncate">{thread.last_message.sender_name}: {thread.last_message.body}</p>
                 )}
-              </div>
-              {thread.last_message && (
-                <p className="text-xs text-primary-400 mt-1 truncate">{thread.last_message.sender_name}: {thread.last_message.body}</p>
-              )}
-              <p className="text-xs text-primary-300 mt-1">{formatDate(thread.created_at)}</p>
-            </button>
+                <p className="text-xs text-primary-300 mt-1">{formatDate(thread.created_at)}</p>
+              </button>
+              <button
+                data-testid={`delete-thread-${thread.id}`}
+                onClick={(e) => handleDeleteThread(e, thread.id)}
+                className="absolute top-3 right-3 p-1.5 text-primary-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded"
+                title="Delete thread"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
           ))}
           {threads.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-primary-400 py-12">
@@ -223,8 +253,14 @@ const MessagesPage: React.FC<MessagesPageProps> = ({ currentUser }) => {
                         }}
                         className="rounded border-primary-300 text-accent focus:ring-accent"
                       />
-                      <span className="text-primary-800">{user.name}</span>
-                      <span className="text-primary-400 text-xs">({user.role})</span>
+                      <span className="text-primary-800 flex-1">{user.name}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        user.role === 'superadmin'
+                          ? 'bg-accent/10 text-accent'
+                          : 'bg-primary-100 text-primary-500'
+                      }`}>
+                        {user.role === 'superadmin' ? 'Admin' : 'Worker'}
+                      </span>
                     </label>
                   ))}
                 </div>

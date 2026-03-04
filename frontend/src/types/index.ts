@@ -17,6 +17,7 @@ export interface User {
   status: UserStatus;
   created_at: string;
   is_clocked_in?: boolean;
+  is_active_session?: boolean;
 }
 
 export interface AuthTokens {

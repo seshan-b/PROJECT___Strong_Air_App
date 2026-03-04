@@ -51,6 +51,7 @@ class User(Base):
     role = Column(SAEnum(UserRole), default=UserRole.user, nullable=False)
     status = Column(SAEnum(UserStatus), default=UserStatus.pending, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    last_active_at = Column(DateTime(timezone=True), nullable=True)  # Updated on login/refresh; used to detect active sessions
 
     # These relationships let us navigate from a user to their related records.
     clock_sessions = relationship("ClockSession", back_populates="user")
@@ -168,4 +169,21 @@ class MessageRecipient(Base):
     # Index to quickly count unread messages per user
     __table_args__ = (
         Index("idx_mr_user", "recipient_id", "is_read"),
+    )
+
+
+# UserThreadDeletion records when a user has "deleted" a thread from their inbox.
+# A row here means that thread is hidden for that user.
+# If an admin hard-deletes a thread, the thread row itself is removed (CASCADE handles cleanup).
+# If a user soft-deletes (worker, or admin messaging another admin), only a row is added here.
+class UserThreadDeletion(Base):
+    __tablename__ = "user_thread_deletions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    thread_id = Column(Integer, ForeignKey("message_threads.id", ondelete="CASCADE"), nullable=False)
+    deleted_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "thread_id", name="uq_user_thread_deletion"),
     )

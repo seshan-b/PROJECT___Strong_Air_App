@@ -45,6 +45,7 @@ async def init_db():
             "ALTER TABLE jobs ADD COLUMN IF NOT EXISTS location VARCHAR(500)",
             "ALTER TABLE jobs ADD COLUMN IF NOT EXISTS latitude FLOAT",
             "ALTER TABLE jobs ADD COLUMN IF NOT EXISTS longitude FLOAT",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_active_at TIMESTAMPTZ",
         ]:
             try:
                 await conn.execute(text(sql))

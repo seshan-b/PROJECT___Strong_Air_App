@@ -153,6 +153,13 @@ const AdminUsersPage: React.FC = () => {
                 <td className="px-6 py-4">
                   {user.id === currentUserId ? (
                     <span className={roleBadge(user.role)}>{roleLabel(user.role)}</span>
+                  ) : (user.is_clocked_in || user.is_active_session) ? (
+                    <div>
+                      <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium border bg-primary-50 text-primary-300 border-primary-100 cursor-not-allowed">
+                        {roleLabel(user.role)}
+                      </span>
+                      <p className="text-xs text-primary-400 mt-1">Cannot change — user is logged in</p>
+                    </div>
                   ) : (
                     <button
                       data-testid={`change-role-${user.id}`}

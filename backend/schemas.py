@@ -61,6 +61,7 @@ class UserResponse(BaseModel):
     status: str
     created_at: datetime
     is_clocked_in: bool = False
+    is_active_session: bool = False
 
     class Config:
         from_attributes = True

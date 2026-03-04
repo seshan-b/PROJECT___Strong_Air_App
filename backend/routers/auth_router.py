@@ -15,6 +15,7 @@ from models import User, UserRole, UserStatus
 from schemas import RegisterRequest, LoginRequest, TokenResponse, UserResponse, RefreshRequest
 from auth import hash_password, verify_password, create_access_token, create_refresh_token, get_current_user, SECRET_KEY, ALGORITHM
 from jose import JWTError, jwt
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -65,6 +66,9 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
     access_token = create_access_token(token_data)
     refresh_token = create_refresh_token(token_data)
 
+    user.last_active_at = datetime.now(timezone.utc)
+    await db.commit()
+
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -94,6 +98,9 @@ async def refresh_token(req: RefreshRequest, db: AsyncSession = Depends(get_db))
     token_data = {"sub": user.id, "role": user.role.value}
     access_token = create_access_token(token_data)
     new_refresh_token = create_refresh_token(token_data)
+
+    user.last_active_at = datetime.now(timezone.utc)
+    await db.commit()
 
     return TokenResponse(
         access_token=access_token,

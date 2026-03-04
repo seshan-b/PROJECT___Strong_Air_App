@@ -12,12 +12,18 @@
 #   Each message has a MessageRecipient row for every person who received it.
 #   is_read starts as False and is set True when the user opens the thread.
 #   The sidebar badge calls /unread-count every 30 seconds to stay up to date.
+#
+# How delete works:
+#   - Worker deletes a thread  → soft delete (only hidden from their inbox; others unaffected).
+#   - Admin deletes a thread that contains at least one Worker → hard delete (wipes for everyone).
+#   - Admin deletes a thread between Admins only → soft delete (only hidden from that admin's inbox).
+#   Soft deletions are stored in user_thread_deletions and filtered out when listing threads.
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, delete
 from database import get_db
-from models import MessageThread, Message, MessageRecipient, User, UserRole
+from models import MessageThread, Message, MessageRecipient, User, UserRole, UserThreadDeletion
 from schemas import CreateThreadRequest, ReplyRequest, MessageResponse, ThreadResponse
 from auth import get_current_user, require_role
 from datetime import datetime, timezone
@@ -26,11 +32,30 @@ from typing import List
 router = APIRouter(prefix="/api/messages", tags=["messages"])
 
 
+async def _soft_delete_thread(db: AsyncSession, user_id: int, thread_id: int) -> None:
+    """Hide a thread from one user's inbox without deleting it from the database."""
+    existing = await db.execute(
+        select(UserThreadDeletion).where(
+            UserThreadDeletion.user_id == user_id,
+            UserThreadDeletion.thread_id == thread_id,
+        )
+    )
+    if not existing.scalar_one_or_none():
+        db.add(UserThreadDeletion(user_id=user_id, thread_id=thread_id))
+    await db.commit()
+
+
 @router.get("/threads", response_model=List[ThreadResponse])
 async def list_threads(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Get IDs of threads this user has soft-deleted (hidden from their inbox)
+    deleted_result = await db.execute(
+        select(UserThreadDeletion.thread_id).where(UserThreadDeletion.user_id == current_user.id)
+    )
+    deleted_ids = {row[0] for row in deleted_result.all()}
+
     # Get threads where user is a recipient or creator
     if current_user.role in [UserRole.superadmin]:
         # Admins see threads they created
@@ -89,6 +114,9 @@ async def list_threads(
             threads = list(result3.scalars().all())
         else:
             threads = []
+
+    # Filter out soft-deleted threads
+    threads = [t for t in threads if t.id not in deleted_ids]
 
     response = []
     for thread in threads:
@@ -259,6 +287,16 @@ async def reply_to_thread(
         recipient = MessageRecipient(message_id=message.id, recipient_id=pid)
         db.add(recipient)
 
+    # If any recipient previously soft-deleted this thread, un-hide it for them —
+    # a new message arriving means the conversation is active again.
+    if all_participants:
+        await db.execute(
+            delete(UserThreadDeletion).where(
+                UserThreadDeletion.thread_id == thread_id,
+                UserThreadDeletion.user_id.in_(list(all_participants)),
+            )
+        )
+
     await db.commit()
     await db.refresh(message)
 
@@ -270,6 +308,59 @@ async def reply_to_thread(
         body=message.body,
         created_at=message.created_at,
     )
+
+
+@router.delete("/threads/{thread_id}")
+async def delete_thread(
+    thread_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    thread_result = await db.execute(select(MessageThread).where(MessageThread.id == thread_id))
+    thread = thread_result.scalar_one_or_none()
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    if current_user.role == UserRole.superadmin:
+        # Gather all participant user IDs in this thread
+        all_participant_ids = {thread.created_by}
+
+        senders_result = await db.execute(
+            select(Message.sender_id).where(Message.thread_id == thread_id).distinct()
+        )
+        for row in senders_result.all():
+            all_participant_ids.add(row[0])
+
+        recip_result = await db.execute(
+            select(MessageRecipient.recipient_id)
+            .join(Message)
+            .where(Message.thread_id == thread_id)
+            .distinct()
+        )
+        for row in recip_result.all():
+            all_participant_ids.add(row[0])
+
+        # Check if any participant is a worker
+        worker_check = await db.execute(
+            select(User.id).where(
+                User.id.in_(all_participant_ids),
+                User.role == UserRole.user,
+            ).limit(1)
+        )
+        has_workers = worker_check.scalar_one_or_none() is not None
+
+        if has_workers:
+            # Hard delete: wipes thread and all messages for everyone
+            await db.execute(delete(MessageThread).where(MessageThread.id == thread_id))
+            await db.commit()
+        else:
+            # Admin-to-admin thread: soft delete for just this admin
+            await _soft_delete_thread(db, current_user.id, thread_id)
+    else:
+        # Worker: soft delete from their own inbox only; others are unaffected
+        await _soft_delete_thread(db, current_user.id, thread_id)
+
+    return {"detail": "Thread deleted"}
 
 
 @router.get("/unread-count")

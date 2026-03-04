@@ -31,6 +31,15 @@ case "$MODE" in
   dev)
     echo "==> [dev] Starting development environment..."
 
+    # Kill any already-running instances so we always get a clean restart
+    echo "==> [0/3] Stopping any existing processes..."
+    pkill -f "uvicorn server:app" 2>/dev/null && echo "    Previous backend stopped." || true
+    pkill -f "react-scripts start" 2>/dev/null && echo "    Previous frontend stopped." || true
+    # Also free the ports directly in case a process is still holding them after SIGTERM
+    fuser -k 8001/tcp 2>/dev/null || true
+    fuser -k 3001/tcp 2>/dev/null || true
+    sleep 1
+
     # Load all env vars from root .env so the frontend dev server picks them up
     set -a
     # shellcheck source=.env

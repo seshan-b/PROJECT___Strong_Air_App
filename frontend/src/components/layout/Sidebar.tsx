@@ -123,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, collapsed, onToggle, unreadCoun
         <button
           data-testid="sidebar-toggle"
           onClick={onToggle}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-primary-400 hover:text-white hover:bg-primary-800/50 rounded-md transition-colors text-sm"
+          className="hidden md:flex w-full items-center justify-center gap-2 px-3 py-2 text-primary-400 hover:text-white hover:bg-primary-800/50 rounded-md transition-colors text-sm"
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           {!collapsed && <span>Collapse</span>}

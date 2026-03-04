@@ -83,6 +83,7 @@ export const authApi = {
 export const usersApi = {
   list: (params?: { status?: string; role?: string }) =>
     api.get<User[]>('/api/users', { params }),
+  directory: () => api.get<User[]>('/api/users/directory'),
   pending: () => api.get<User[]>('/api/users/pending'),
   approve: (userId: number, status: string) =>
     api.patch<User>(`/api/users/${userId}/approve`, { status }),
@@ -129,6 +130,7 @@ export const messagesApi = {
   reply: (threadId: number, body: string) =>
     api.post<Message>(`/api/messages/threads/${threadId}/reply`, { body }),
   unreadCount: () => api.get<{ unread_count: number }>('/api/messages/unread-count'),
+  deleteThread: (threadId: number) => api.delete(`/api/messages/threads/${threadId}`),
 };
 
 // Analytics
