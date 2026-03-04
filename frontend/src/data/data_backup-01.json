@@ -1,0 +1,559 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Sasi M",
+      "email": "admin@strongair.com",
+      "phone": "+64 21 000 0001",
+      "username": "sasi_m",
+      "password_hash": "$2b$12$ahqoeGvAl8e.pLMRX/4lKuOptGojLun4E.Mu7OJnhLcN02FQc/axi",
+      "role": "superadmin",
+      "status": "verified",
+      "created_at": "2026-03-02T10:30:30.060938+00:00",
+      "last_active_at": "2026-03-04T02:26:27.921116+00:00"
+    },
+    {
+      "id": 2,
+      "name": "Site Manager",
+      "email": "manager@strongair.com",
+      "phone": "+64 21 000 0002",
+      "username": "sitemanager",
+      "password_hash": "$2b$12$RUGEsMHnasw4LWRRUoHppu9KSICBYFH7I.9Or3TE5kXU6H3Jn/eIK",
+      "role": "user",
+      "status": "verified",
+      "created_at": "2026-03-02T10:30:30.224692+00:00",
+      "last_active_at": null
+    },
+    {
+      "id": 3,
+      "name": "John Builder",
+      "email": "john@strongair.com",
+      "phone": "02102978089",
+      "username": "johnb",
+      "password_hash": "$2b$12$OcwwRovhF6UY2tyy7aOXyugCgheGsI9.7QZp6Fh0eeX0spldAX3dG",
+      "role": "user",
+      "status": "verified",
+      "created_at": "2026-03-02T10:30:30.873233+00:00",
+      "last_active_at": "2026-03-04T01:57:06.404225+00:00"
+    },
+    {
+      "id": 4,
+      "name": "Sarah Mason",
+      "email": "sarah@strongair.com",
+      "phone": "+64 21 111 0002",
+      "username": "sarahm",
+      "password_hash": "$2b$12$1LEZhM/UTv1M1BUmPtLI6.93ZpbXdBvrj7ewTfkAiapGDzC6UV0Li",
+      "role": "user",
+      "status": "verified",
+      "created_at": "2026-03-02T10:30:30.873236+00:00",
+      "last_active_at": "2026-03-04T02:26:54.878741+00:00"
+    },
+    {
+      "id": 5,
+      "name": "Mike Crane",
+      "email": "mike@strongair.com",
+      "phone": "+64 21 111 0003",
+      "username": "mikec",
+      "password_hash": "$2b$12$Kv2jNfY6meVoaQEg2F.RXOv9VBLaGf49B63l7ir96hyeHQM55cdga",
+      "role": "user",
+      "status": "verified",
+      "created_at": "2026-03-02T10:30:30.873237+00:00",
+      "last_active_at": null
+    },
+    {
+      "id": 6,
+      "name": "Lisa Plumber",
+      "email": "lisa@strongair.com",
+      "phone": "+64 21 111 0004",
+      "username": "lisap",
+      "password_hash": "$2b$12$QxjPCHi0L1Wl6go2fTBkRe5ZjwYeV1xFQjz6tf.T7rBmljg.tPyK2",
+      "role": "user",
+      "status": "verified",
+      "created_at": "2026-03-02T10:30:30.873237+00:00",
+      "last_active_at": null
+    },
+    {
+      "id": 8,
+      "name": "Ashan Harry",
+      "email": "ashan@gmail.com",
+      "phone": "+642102978089",
+      "username": "ashan_h",
+      "password_hash": "$2b$12$O2SKoPXIYg3xO4z/6zP1q.VeSnVjCDQz5ABFreUsJAach4ylVg312",
+      "role": "superadmin",
+      "status": "verified",
+      "created_at": "2026-03-03T11:18:44.746673+00:00",
+      "last_active_at": null
+    }
+  ],
+  "jobs": [
+    {
+      "id": 1,
+      "title": "Highway Bridge Repair",
+      "description": "Structural repair work on the main highway bridge overpass.",
+      "image_url": null,
+      "status": "active",
+      "created_at": "2026-03-02T10:30:31.037417+00:00",
+      "location": "Auckland Harbour Bridge, Auckland",
+      "latitude": -36.8282,
+      "longitude": 174.7681
+    },
+    {
+      "id": 2,
+      "title": "Office Tower Foundation",
+      "description": "Foundation laying for the new 12-story office complex downtown.",
+      "image_url": null,
+      "status": "active",
+      "created_at": "2026-03-02T10:30:31.037419+00:00",
+      "location": "Sky Tower, Auckland CBD",
+      "latitude": -36.8485,
+      "longitude": 174.7633
+    },
+    {
+      "id": 3,
+      "title": "Residential Block C",
+      "description": "Construction of residential apartments in Block C of the development.",
+      "image_url": null,
+      "status": "active",
+      "created_at": "2026-03-02T10:30:31.037419+00:00",
+      "location": "Manukau, Auckland",
+      "latitude": -36.9969,
+      "longitude": 174.8793
+    },
+    {
+      "id": 4,
+      "title": "Warehouse Renovation",
+      "description": "Interior renovation and structural reinforcement of the old warehouse.",
+      "image_url": null,
+      "status": "active",
+      "created_at": "2026-03-02T10:30:31.037420+00:00",
+      "location": "Penrose, Auckland",
+      "latitude": -36.9163,
+      "longitude": 174.806
+    },
+    {
+      "id": 5,
+      "title": "Demo Building",
+      "description": "A place new job",
+      "image_url": null,
+      "status": "active",
+      "created_at": "2026-03-03T12:40:23.315109+00:00",
+      "location": "6/98 Roberts Road, Te Atat\u016b South, Auckland 0610, New Zealand",
+      "latitude": -36.869707999999996,
+      "longitude": 174.6541426
+    },
+    {
+      "id": 6,
+      "title": "Demo Building 2",
+      "description": "A description",
+      "image_url": null,
+      "status": "active",
+      "created_at": "2026-03-03T21:55:44.104875+00:00",
+      "location": "34 Wharetana Crescent, New Lynn, Auckland 0600, New Zealand",
+      "latitude": -36.9140133,
+      "longitude": 174.6830454
+    }
+  ],
+  "job_assignments": [
+    {
+      "id": 6,
+      "job_id": 3,
+      "user_id": 6,
+      "assigned_at": "2026-03-02T10:30:31.042713+00:00"
+    },
+    {
+      "id": 13,
+      "job_id": 4,
+      "user_id": 6,
+      "assigned_at": "2026-03-03T03:22:59.181432+00:00"
+    },
+    {
+      "id": 15,
+      "job_id": 4,
+      "user_id": 5,
+      "assigned_at": "2026-03-03T11:25:59.059984+00:00"
+    },
+    {
+      "id": 16,
+      "job_id": 2,
+      "user_id": 5,
+      "assigned_at": "2026-03-03T11:26:10.840029+00:00"
+    },
+    {
+      "id": 17,
+      "job_id": 6,
+      "user_id": 3,
+      "assigned_at": "2026-03-03T22:36:50.174526+00:00"
+    }
+  ],
+  "clock_sessions": [
+    {
+      "id": 1,
+      "user_id": 3,
+      "job_id": 1,
+      "clock_in": "2026-02-23T08:00:00.044727+00:00",
+      "clock_out": "2026-02-23T16:00:00.044727+00:00",
+      "duration_minutes": 480.0,
+      "created_at": "2026-03-02T10:30:31.045543+00:00"
+    },
+    {
+      "id": 2,
+      "user_id": 3,
+      "job_id": 1,
+      "clock_in": "2026-02-24T08:00:00.044727+00:00",
+      "clock_out": "2026-02-24T16:00:00.044727+00:00",
+      "duration_minutes": 480.0,
+      "created_at": "2026-03-02T10:30:31.045545+00:00"
+    },
+    {
+      "id": 3,
+      "user_id": 4,
+      "job_id": 2,
+      "clock_in": "2026-02-24T08:00:00.044727+00:00",
+      "clock_out": "2026-02-24T17:30:00.044727+00:00",
+      "duration_minutes": 570.0,
+      "created_at": "2026-03-02T10:30:31.045545+00:00"
+    },
+    {
+      "id": 4,
+      "user_id": 5,
+      "job_id": 3,
+      "clock_in": "2026-02-24T08:00:00.044727+00:00",
+      "clock_out": "2026-02-24T16:00:00.044727+00:00",
+      "duration_minutes": 480.0,
+      "created_at": "2026-03-02T10:30:31.045545+00:00"
+    },
+    {
+      "id": 5,
+      "user_id": 3,
+      "job_id": 1,
+      "clock_in": "2026-02-25T08:00:00.044727+00:00",
+      "clock_out": "2026-02-25T16:00:00.044727+00:00",
+      "duration_minutes": 480.0,
+      "created_at": "2026-03-02T10:30:31.045546+00:00"
+    },
+    {
+      "id": 6,
+      "user_id": 3,
+      "job_id": 1,
+      "clock_in": "2026-02-26T08:00:00.044727+00:00",
+      "clock_out": "2026-02-26T16:00:00.044727+00:00",
+      "duration_minutes": 480.0,
+      "created_at": "2026-03-02T10:30:31.045546+00:00"
+    },
+    {
+      "id": 7,
+      "user_id": 4,
+      "job_id": 2,
+      "clock_in": "2026-02-26T08:00:00.044727+00:00",
+      "clock_out": "2026-02-26T17:30:00.044727+00:00",
+      "duration_minutes": 570.0,
+      "created_at": "2026-03-02T10:30:31.045546+00:00"
+    },
+    {
+      "id": 8,
+      "user_id": 6,
+      "job_id": 4,
+      "clock_in": "2026-02-26T08:00:00.044727+00:00",
+      "clock_out": "2026-02-26T17:30:00.044727+00:00",
+      "duration_minutes": 570.0,
+      "created_at": "2026-03-02T10:30:31.045547+00:00"
+    },
+    {
+      "id": 9,
+      "user_id": 3,
+      "job_id": 1,
+      "clock_in": "2026-02-27T08:00:00.044727+00:00",
+      "clock_out": "2026-02-27T16:00:00.044727+00:00",
+      "duration_minutes": 480.0,
+      "created_at": "2026-03-02T10:30:31.045547+00:00"
+    },
+    {
+      "id": 10,
+      "user_id": 5,
+      "job_id": 3,
+      "clock_in": "2026-02-27T08:00:00.044727+00:00",
+      "clock_out": "2026-02-27T16:00:00.044727+00:00",
+      "duration_minutes": 480.0,
+      "created_at": "2026-03-02T10:30:31.045547+00:00"
+    },
+    {
+      "id": 11,
+      "user_id": 3,
+      "job_id": 1,
+      "clock_in": "2026-02-28T08:00:00.044727+00:00",
+      "clock_out": "2026-02-28T16:00:00.044727+00:00",
+      "duration_minutes": 480.0,
+      "created_at": "2026-03-02T10:30:31.045547+00:00"
+    },
+    {
+      "id": 12,
+      "user_id": 4,
+      "job_id": 2,
+      "clock_in": "2026-02-28T08:00:00.044727+00:00",
+      "clock_out": "2026-02-28T17:30:00.044727+00:00",
+      "duration_minutes": 570.0,
+      "created_at": "2026-03-02T10:30:31.045548+00:00"
+    },
+    {
+      "id": 13,
+      "user_id": 3,
+      "job_id": 1,
+      "clock_in": "2026-03-01T08:00:00.044727+00:00",
+      "clock_out": "2026-03-01T16:00:00.044727+00:00",
+      "duration_minutes": 480.0,
+      "created_at": "2026-03-02T10:30:31.045548+00:00"
+    },
+    {
+      "id": 14,
+      "user_id": 3,
+      "job_id": 1,
+      "clock_in": "2026-03-02T10:33:16.059459+00:00",
+      "clock_out": "2026-03-02T10:33:29.063842+00:00",
+      "duration_minutes": 0.22,
+      "created_at": "2026-03-02T10:33:16.060228+00:00"
+    },
+    {
+      "id": 15,
+      "user_id": 3,
+      "job_id": 4,
+      "clock_in": "2026-03-02T10:33:36.770687+00:00",
+      "clock_out": "2026-03-02T10:33:41.486264+00:00",
+      "duration_minutes": 0.08,
+      "created_at": "2026-03-02T10:33:36.771443+00:00"
+    },
+    {
+      "id": 16,
+      "user_id": 3,
+      "job_id": 1,
+      "clock_in": "2026-03-02T10:43:01.184858+00:00",
+      "clock_out": "2026-03-02T10:43:02.434288+00:00",
+      "duration_minutes": 0.02,
+      "created_at": "2026-03-02T10:43:01.185660+00:00"
+    },
+    {
+      "id": 17,
+      "user_id": 3,
+      "job_id": 4,
+      "clock_in": "2026-03-02T10:57:36.291592+00:00",
+      "clock_out": "2026-03-02T11:01:58.318794+00:00",
+      "duration_minutes": 4.37,
+      "created_at": "2026-03-02T10:57:36.292439+00:00"
+    },
+    {
+      "id": 18,
+      "user_id": 3,
+      "job_id": 1,
+      "clock_in": "2026-03-02T11:08:10.252859+00:00",
+      "clock_out": "2026-03-02T11:08:18.582207+00:00",
+      "duration_minutes": 0.14,
+      "created_at": "2026-03-02T11:08:10.253080+00:00"
+    },
+    {
+      "id": 19,
+      "user_id": 3,
+      "job_id": 4,
+      "clock_in": "2026-03-02T11:13:09.177807+00:00",
+      "clock_out": "2026-03-02T11:13:50.137164+00:00",
+      "duration_minutes": 0.68,
+      "created_at": "2026-03-02T11:13:09.178614+00:00"
+    },
+    {
+      "id": 20,
+      "user_id": 3,
+      "job_id": 4,
+      "clock_in": "2026-03-02T11:16:01.034720+00:00",
+      "clock_out": "2026-03-02T11:16:03.905366+00:00",
+      "duration_minutes": 0.05,
+      "created_at": "2026-03-02T11:16:01.034926+00:00"
+    },
+    {
+      "id": 21,
+      "user_id": 3,
+      "job_id": 4,
+      "clock_in": "2026-03-02T11:31:23.668850+00:00",
+      "clock_out": "2026-03-02T11:31:28.471343+00:00",
+      "duration_minutes": 0.08,
+      "created_at": "2026-03-02T11:31:23.669783+00:00"
+    },
+    {
+      "id": 22,
+      "user_id": 3,
+      "job_id": 4,
+      "clock_in": "2026-03-02T11:48:20.906653+00:00",
+      "clock_out": "2026-03-02T11:48:34.138275+00:00",
+      "duration_minutes": 0.22,
+      "created_at": "2026-03-02T11:48:20.906996+00:00"
+    },
+    {
+      "id": 23,
+      "user_id": 3,
+      "job_id": 4,
+      "clock_in": "2026-03-02T11:48:40.811605+00:00",
+      "clock_out": "2026-03-02T11:50:04.401065+00:00",
+      "duration_minutes": 1.39,
+      "created_at": "2026-03-02T11:48:40.811797+00:00"
+    },
+    {
+      "id": 24,
+      "user_id": 3,
+      "job_id": 4,
+      "clock_in": "2026-03-03T01:44:52.363678+00:00",
+      "clock_out": "2026-03-03T01:45:40.793904+00:00",
+      "duration_minutes": 0.81,
+      "created_at": "2026-03-03T01:44:52.364281+00:00"
+    },
+    {
+      "id": 25,
+      "user_id": 5,
+      "job_id": 2,
+      "clock_in": "2026-03-03T11:26:22.285224+00:00",
+      "clock_out": "2026-03-03T11:26:30.038166+00:00",
+      "duration_minutes": 0.13,
+      "created_at": "2026-03-03T11:26:22.286140+00:00"
+    },
+    {
+      "id": 26,
+      "user_id": 5,
+      "job_id": 2,
+      "clock_in": "2026-03-03T11:26:31.314339+00:00",
+      "clock_out": "2026-03-03T11:26:34.302896+00:00",
+      "duration_minutes": 0.05,
+      "created_at": "2026-03-03T11:26:31.314564+00:00"
+    },
+    {
+      "id": 27,
+      "user_id": 5,
+      "job_id": 2,
+      "clock_in": "2026-03-03T11:26:40.533867+00:00",
+      "clock_out": "2026-03-03T11:28:54.246670+00:00",
+      "duration_minutes": 2.23,
+      "created_at": "2026-03-03T11:26:40.534350+00:00"
+    },
+    {
+      "id": 28,
+      "user_id": 3,
+      "job_id": 6,
+      "clock_in": "2026-03-03T22:36:53.939235+00:00",
+      "clock_out": "2026-03-03T22:39:05.891417+00:00",
+      "duration_minutes": 2.2,
+      "created_at": "2026-03-03T22:36:53.939879+00:00"
+    }
+  ],
+  "message_threads": [
+    {
+      "id": 1,
+      "subject": "Safety Meeting Tomorrow",
+      "created_by": 2,
+      "created_at": "2026-03-02T10:30:31.047646+00:00"
+    },
+    {
+      "id": 11,
+      "subject": "You",
+      "created_by": 8,
+      "created_at": "2026-03-04T01:14:15.251751+00:00"
+    }
+  ],
+  "messages": [
+    {
+      "id": 1,
+      "thread_id": 1,
+      "sender_id": 2,
+      "body": "Reminder: Mandatory safety meeting tomorrow at 7:30 AM in the site office. Please be on time.",
+      "created_at": "2026-03-02T10:30:31.049020+00:00"
+    },
+    {
+      "id": 24,
+      "thread_id": 11,
+      "sender_id": 8,
+      "body": "Cunt",
+      "created_at": "2026-03-04T01:14:15.253036+00:00"
+    },
+    {
+      "id": 25,
+      "thread_id": 11,
+      "sender_id": 8,
+      "body": "Fuck you",
+      "created_at": "2026-03-04T01:14:23.801072+00:00"
+    },
+    {
+      "id": 26,
+      "thread_id": 11,
+      "sender_id": 1,
+      "body": "Kiss my black ass",
+      "created_at": "2026-03-04T01:14:36.078422+00:00"
+    },
+    {
+      "id": 27,
+      "thread_id": 11,
+      "sender_id": 1,
+      "body": "You kiss my balls",
+      "created_at": "2026-03-04T01:14:57.618848+00:00"
+    }
+  ],
+  "message_recipients": [
+    {
+      "id": 1,
+      "message_id": 1,
+      "recipient_id": 3,
+      "is_read": true,
+      "read_at": "2026-03-02T10:33:56.703717+00:00"
+    },
+    {
+      "id": 2,
+      "message_id": 1,
+      "recipient_id": 4,
+      "is_read": true,
+      "read_at": "2026-03-03T10:41:42.768355+00:00"
+    },
+    {
+      "id": 3,
+      "message_id": 1,
+      "recipient_id": 5,
+      "is_read": true,
+      "read_at": "2026-03-03T11:25:35.679883+00:00"
+    },
+    {
+      "id": 4,
+      "message_id": 1,
+      "recipient_id": 6,
+      "is_read": false,
+      "read_at": null
+    },
+    {
+      "id": 27,
+      "message_id": 24,
+      "recipient_id": 1,
+      "is_read": true,
+      "read_at": "2026-03-04T01:14:19.946201+00:00"
+    },
+    {
+      "id": 28,
+      "message_id": 25,
+      "recipient_id": 1,
+      "is_read": true,
+      "read_at": "2026-03-04T01:14:31.596568+00:00"
+    },
+    {
+      "id": 29,
+      "message_id": 26,
+      "recipient_id": 8,
+      "is_read": true,
+      "read_at": "2026-03-04T01:14:41.926703+00:00"
+    },
+    {
+      "id": 30,
+      "message_id": 27,
+      "recipient_id": 8,
+      "is_read": true,
+      "read_at": "2026-03-04T01:15:06.811471+00:00"
+    }
+  ],
+  "user_thread_deletions": [
+    {
+      "id": 2,
+      "user_id": 3,
+      "thread_id": 1,
+      "deleted_at": "2026-03-04T01:11:46.270723+00:00"
+    }
+  ]
+}

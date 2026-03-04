@@ -1,0 +1,175 @@
+{
+  "brand_identity": {
+    "name": "Strong Air",
+    "archetype": "The Performance Pro (Industrial Variant)",
+    "core_values": ["Safety", "Precision", "Reliability", "Efficiency"],
+    "emotional_tone": "Professional, Industrial, Clean, Trustworthy"
+  },
+  "typography": {
+    "primary_font": "Manrope",
+    "secondary_font": "IBM Plex Sans",
+    "google_fonts_import": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap",
+    "usage": {
+      "headings": {
+        "font_family": "Manrope, sans-serif",
+        "weights": {
+          "h1": "800",
+          "h2": "700",
+          "h3": "600"
+        },
+        "tracking": "tight"
+      },
+      "body": {
+        "font_family": "IBM Plex Sans, sans-serif",
+        "weights": {
+          "regular": "400",
+          "medium": "500",
+          "bold": "600"
+        }
+      }
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#0F172A",
+        "foreground": "#F8FAFC",
+        "50": "#F8FAFC",
+        "100": "#F1F5F9",
+        "200": "#E2E8F0",
+        "300": "#CBD5E1",
+        "400": "#94A3B8",
+        "500": "#64748B",
+        "600": "#475569",
+        "700": "#334155",
+        "800": "#1E293B",
+        "900": "#0F172A",
+        "950": "#020617"
+      },
+      "accent": {
+        "DEFAULT": "#F97316",
+        "foreground": "#FFFFFF",
+        "50": "#FFF7ED",
+        "100": "#FFEDD5",
+        "200": "#FED7AA",
+        "300": "#FDBA74",
+        "400": "#FB923C",
+        "500": "#F97316",
+        "600": "#EA580C",
+        "700": "#C2410C",
+        "800": "#9A3412",
+        "900": "#7C2D12"
+      },
+      "secondary": {
+        "DEFAULT": "#F1F5F9",
+        "foreground": "#0F172A"
+      },
+      "success": {
+        "DEFAULT": "#16A34A",
+        "foreground": "#FFFFFF"
+      },
+      "destructive": {
+        "DEFAULT": "#DC2626",
+        "foreground": "#FFFFFF"
+      },
+      "background": "#F8FAFC",
+      "surface": "#FFFFFF",
+      "border": "#E2E8F0"
+    },
+    "semantic_usage": {
+      "primary_action": "bg-primary text-primary-foreground hover:bg-primary/90",
+      "secondary_action": "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      "accent_action": "bg-accent text-accent-foreground hover:bg-accent/90 (Use for Clock In/Out)",
+      "destructive_action": "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+      "sidebar_bg": "bg-slate-900",
+      "sidebar_text": "text-slate-300",
+      "sidebar_active": "bg-slate-800 text-white border-l-4 border-accent"
+    }
+  },
+  "layout_strategies": {
+    "spacing_scale": "Generous (p-6, p-8, p-12)",
+    "border_radius": {
+      "default": "rounded-md",
+      "card": "rounded-lg",
+      "button": "rounded-md",
+      "input": "rounded-md"
+    },
+    "admin_dashboard": {
+      "structure": "Sidebar (Fixed Left) + Header (Top) + Main Content (Scrollable)",
+      "grid": "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+      "card_style": "bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200"
+    },
+    "mobile_worker_app": {
+      "structure": "Full height flex-col + Bottom Navigation (Sticky)",
+      "padding": "px-4 py-6",
+      "touch_targets": "min-h-[48px]",
+      "card_style": "bg-white border border-slate-100 shadow-sm rounded-xl mb-4"
+    }
+  },
+  "components": {
+    "buttons": {
+      "base": "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+      "variants": {
+        "default": "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        "accent": "bg-accent text-white shadow-md hover:bg-accent/90 (Use for Critical Field Actions)",
+        "outline": "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+        "ghost": "hover:bg-accent hover:text-accent-foreground"
+      }
+    },
+    "cards": {
+      "base": "rounded-lg border bg-card text-card-foreground shadow-sm",
+      "header": "flex flex-col space-y-1.5 p-6",
+      "content": "p-6 pt-0"
+    },
+    "inputs": {
+      "base": "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    },
+    "badges": {
+      "status_pending": "bg-yellow-100 text-yellow-800 border-yellow-200",
+      "status_approved": "bg-green-100 text-green-800 border-green-200",
+      "status_rejected": "bg-red-100 text-red-800 border-red-200",
+      "role_admin": "bg-slate-100 text-slate-800 border-slate-200",
+      "role_super_admin": "bg-purple-100 text-purple-800 border-purple-200"
+    }
+  },
+  "visual_assets": {
+    "image_style": "High contrast, realistic, industrial, candid.",
+    "icons": "Lucide React (Standard, Clean, Stroke Width 2px)",
+    "images": {
+      "login_hero": {
+        "url": "https://images.unsplash.com/photo-1694521787162-5373b598945c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODl8MHwxfHNlYXJjaHwyfHxjb25zdHJ1Y3Rpb24lMjB3b3JrZXIlMjBzaXRlJTIwc2FmZXR5fGVufDB8fHx8MTc3MjQ0MTk2Mnww&ixlib=rb-4.1.0&q=85",
+        "alt": "Construction team on site",
+        "usage": "Full height split screen on Desktop Login/Register"
+      },
+      "dashboard_empty_state": {
+        "url": "https://images.unsplash.com/photo-1673978483693-9e4be55b2a35?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODl8MHwxfHNlYXJjaHwzfHxjb25zdHJ1Y3Rpb24lMjB3b3JrZXIlMjBzaXRlJTIwc2FmZXR5fGVufDB8fHx8MTc3MjQ0MTk2Mnww&ixlib=rb-4.1.0&q=85",
+        "alt": "Worker inspecting plans",
+        "usage": "Empty states or 'No Jobs' view"
+      },
+      "logo_placeholder": {
+        "url": "https://images.unsplash.com/photo-1611954302674-4a311ac4da75?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjb25zdHJ1Y3Rpb24lMjBjb21wYW55JTIwbG9nb3N8ZW58MHx8fHwxNzcyNDQxOTY1fDA&ixlib=rb-4.1.0&q=85",
+        "alt": "Strong Air Logo Placeholder",
+        "usage": "Navbar logo or favicon reference"
+      }
+    }
+  },
+  "charts_guidelines": {
+    "library": "Recharts",
+    "palette": ["#0F172A", "#F97316", "#64748B", "#CBD5E1"],
+    "style": "Minimalist. Remove grid lines where possible. Use customized tooltips with shadcn card styling."
+  },
+  "accessibility": {
+    "contrast_standard": "WCAG AA",
+    "focus_states": "Visible ring-2 ring-offset-2 ring-primary",
+    "touch_targets": "Minimum 44px for all mobile interactions"
+  },
+  "universal_guidelines": [
+    "Do not use gradients for backgrounds. Stick to solid colors.",
+    "Use Manrope for all Headings (font-weight 600+).",
+    "Use IBM Plex Sans for all Body text.",
+    "Always check contrast ratios for text on colored backgrounds.",
+    "Mobile First: Ensure all layouts work on 375px width.",
+    "Use 'Lucide React' for icons.",
+    "All interactive elements MUST have data-testid attributes."
+  ]
+}
