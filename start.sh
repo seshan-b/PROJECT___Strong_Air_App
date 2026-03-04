@@ -100,10 +100,20 @@ case "$MODE" in
       exit 1
     fi
 
+    # ── Python virtual environment ─────────────────────────────────────────
+    VENV="$ROOT_DIR/venv"
+    if [ ! -f "$VENV/bin/pip" ]; then
+      echo "==> [venv] Creating Python virtual environment..."
+      python3 -m venv "$VENV"
+      echo "==> [venv] Installing backend dependencies..."
+      "$VENV/bin/pip" install -r "$ROOT_DIR/backend/requirements.txt"
+    fi
+    # ──────────────────────────────────────────────────────────────────────
+
     echo ""
     echo "  Restoring from: $(basename "$RESTORE_FILE")..."
     cd "$ROOT_DIR/backend"
-    python3 restore_db.py "$RESTORE_FILE"
+    "$VENV/bin/python3" restore_db.py "$RESTORE_FILE"
     echo ""
     # ──────────────────────────────────────────────────────────────────────
 
@@ -121,7 +131,7 @@ case "$MODE" in
     echo "==> [4/4] Starting backend (:8001) and frontend (:3001)..."
 
     cd "$ROOT_DIR/backend"
-    uvicorn server:app --reload --port 8001 &
+    "$VENV/bin/uvicorn" server:app --reload --port 8001 &
     BACKEND_PID=$!
 
     cd "$ROOT_DIR/frontend"
