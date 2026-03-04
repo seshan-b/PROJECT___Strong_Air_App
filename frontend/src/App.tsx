@@ -15,6 +15,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import type { User } from './types';
+import { authApi } from './api/client';
 import AppLayout from './components/layout/AppLayout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
@@ -50,7 +51,8 @@ const App: React.FC = () => {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try { await authApi.logout(); } catch { /* best-effort */ }
     localStorage.clear();
     setUser(null);
   };

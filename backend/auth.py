@@ -95,6 +95,13 @@ async def get_current_user(
     user = result.scalar_one_or_none()
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
+
+    # Keep last_active_at fresh (throttled to one write per minute to avoid excessive DB writes)
+    now = datetime.now(timezone.utc)
+    if user.last_active_at is None or (now - user.last_active_at).total_seconds() > 60:
+        user.last_active_at = now
+        await db.commit()
+
     return user
 
 

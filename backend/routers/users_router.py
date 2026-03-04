@@ -33,9 +33,9 @@ async def list_users(
     )
     active_user_ids = set(active_result.scalars().all())
 
-    # A user is considered to have an active session if they logged in or refreshed within the last 35 minutes
-    # (access tokens last 30 min; 5-minute buffer for overlap)
-    session_cutoff = datetime.now(timezone.utc) - timedelta(minutes=35)
+    # A user is considered active if they made any API call within the last 5 minutes.
+    # last_active_at is updated on every authenticated request (see auth.py get_current_user).
+    session_cutoff = datetime.now(timezone.utc) - timedelta(minutes=5)
 
     return [
         UserResponse.model_validate(u).model_copy(update={
