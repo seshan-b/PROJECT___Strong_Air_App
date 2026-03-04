@@ -111,8 +111,11 @@ case "$MODE" in
     # ──────────────────────────────────────────────────────────────────────
 
     echo ""
-    echo "  Restoring from: $(basename "$RESTORE_FILE")..."
+    echo "  Initialising database schema..."
     cd "$ROOT_DIR/backend"
+    "$VENV/bin/python3" -c "import asyncio; from database import init_db; from models import *; asyncio.run(init_db())"
+
+    echo "  Restoring from: $(basename "$RESTORE_FILE")..."
     "$VENV/bin/python3" restore_db.py "$RESTORE_FILE"
     echo ""
     # ──────────────────────────────────────────────────────────────────────
