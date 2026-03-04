@@ -4,6 +4,12 @@ set -e
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Load all env vars from .env
+set -a
+# shellcheck source=.env
+source "$ROOT_DIR/.env"
+set +a
+
 # If no argument given, prompt the user
 if [ -z "$1" ]; then
   echo ""
@@ -25,10 +31,73 @@ else
   MODE="$1"
 fi
 
+# ── Shared: data file selection ────────────────────────────────────────────
+select_data_file() {
+  local step="$1"
+  DATA_DIR="$ROOT_DIR/frontend/src/data"
+  mkdir -p "$DATA_DIR"
+
+  BACKUP_FILES=()
+  for f in "$DATA_DIR"/data_backup-*.json; do
+    [ -f "$f" ] && BACKUP_FILES+=("$f")
+  done
+  IFS=$'\n' BACKUP_FILES=($(printf '%s\n' "${BACKUP_FILES[@]}" | sort)); unset IFS
+
+  echo "==> [$step] Select data file to restore:"
+  echo ""
+  echo "  ─────────────────────────────────────"
+  echo "  0) Default — data_backup.json"
+  for i in "${!BACKUP_FILES[@]}"; do
+    echo "  $((i + 1))) $(basename "${BACKUP_FILES[$i]}" .json)"
+  done
+  echo ""
+  read -rp "  Select [0-${#BACKUP_FILES[@]}]: " data_choice
+
+  if [ "$data_choice" = "0" ]; then
+    RESTORE_FILE="$DATA_DIR/data_backup.json"
+  elif [[ "$data_choice" =~ ^[0-9]+$ ]] && \
+       [ "$data_choice" -ge 1 ] && [ "$data_choice" -le "${#BACKUP_FILES[@]}" ]; then
+    RESTORE_FILE="${BACKUP_FILES[$((data_choice - 1))]}"
+  else
+    echo "  Invalid choice. Exiting."
+    exit 1
+  fi
+
+  if [ ! -f "$RESTORE_FILE" ]; then
+    echo "  Error: file not found — $(basename "$RESTORE_FILE")"
+    exit 1
+  fi
+}
+
+# ── Shared: venv + restore ─────────────────────────────────────────────────
+restore_data() {
+  VENV="$ROOT_DIR/venv"
+  if [ ! -f "$VENV/bin/pip" ]; then
+    echo "==> [venv] Creating Python virtual environment..."
+    python3 -m venv "$VENV"
+    echo "==> [venv] Installing backend dependencies..."
+    "$VENV/bin/pip" install -r "$ROOT_DIR/backend/requirements.txt"
+  fi
+
+  echo ""
+  echo "  Initialising database schema..."
+  cd "$ROOT_DIR/backend"
+  "$VENV/bin/python3" -c "import asyncio; from database import init_db; from models import *; asyncio.run(init_db())"
+
+  echo "  Restoring from: $(basename "$RESTORE_FILE")..."
+  "$VENV/bin/python3" restore_db.py "$RESTORE_FILE"
+  echo ""
+}
+
 case "$MODE" in
 
   # ─── LOCAL DEVELOPMENT ────────────────────────────────────────────────────
   dev)
+    export SECRET_KEY="$DEV_SECRET_KEY"
+    export ALLOWED_ORIGINS="$DEV_ALLOWED_ORIGINS"
+    export REACT_APP_BACKEND_URL="$DEV_REACT_APP_BACKEND_URL"
+    export PORT=3001
+
     echo "==> [dev] Starting development environment..."
 
     # Kill any already-running instances so we always get a clean restart
@@ -39,12 +108,6 @@ case "$MODE" in
     fuser -k 8001/tcp 2>/dev/null || true
     fuser -k 3001/tcp 2>/dev/null || true
     sleep 1
-
-    # Load all env vars from root .env so the frontend dev server picks them up
-    set -a
-    # shellcheck source=.env
-    source "$ROOT_DIR/.env"
-    set +a
 
     # Start only the postgres container
     echo "==> [1/4] Starting PostgreSQL container..."
@@ -62,63 +125,8 @@ case "$MODE" in
       sleep 1
     done
 
-    # ── Data file selection ────────────────────────────────────────────────
-    echo "==> [2/4] Select data file to restore:"
-
-    DATA_DIR="$ROOT_DIR/frontend/src/data"
-    mkdir -p "$DATA_DIR"
-
-    # Collect incremental backup files, sorted by name
-    BACKUP_FILES=()
-    for f in "$DATA_DIR"/data_backup-*.json; do
-      [ -f "$f" ] && BACKUP_FILES+=("$f")
-    done
-    # Sort (shell glob is alphabetical, but make it explicit)
-    IFS=$'\n' BACKUP_FILES=($(printf '%s\n' "${BACKUP_FILES[@]}" | sort)); unset IFS
-
-    echo ""
-    echo "  ─────────────────────────────────────"
-    echo "  0) Default — data_backup.json"
-    for i in "${!BACKUP_FILES[@]}"; do
-      echo "  $((i + 1))) $(basename "${BACKUP_FILES[$i]}" .json)"
-    done
-    echo ""
-    read -rp "  Select [0-${#BACKUP_FILES[@]}]: " data_choice
-
-    if [ "$data_choice" = "0" ]; then
-      RESTORE_FILE="$DATA_DIR/data_backup.json"
-    elif [[ "$data_choice" =~ ^[0-9]+$ ]] && \
-         [ "$data_choice" -ge 1 ] && [ "$data_choice" -le "${#BACKUP_FILES[@]}" ]; then
-      RESTORE_FILE="${BACKUP_FILES[$((data_choice - 1))]}"
-    else
-      echo "  Invalid choice. Exiting."
-      exit 1
-    fi
-
-    if [ ! -f "$RESTORE_FILE" ]; then
-      echo "  Error: file not found — $(basename "$RESTORE_FILE")"
-      exit 1
-    fi
-
-    # ── Python virtual environment ─────────────────────────────────────────
-    VENV="$ROOT_DIR/venv"
-    if [ ! -f "$VENV/bin/pip" ]; then
-      echo "==> [venv] Creating Python virtual environment..."
-      python3 -m venv "$VENV"
-      echo "==> [venv] Installing backend dependencies..."
-      "$VENV/bin/pip" install -r "$ROOT_DIR/backend/requirements.txt"
-    fi
-    # ──────────────────────────────────────────────────────────────────────
-
-    echo ""
-    echo "  Initialising database schema..."
-    cd "$ROOT_DIR/backend"
-    "$VENV/bin/python3" -c "import asyncio; from database import init_db; from models import *; asyncio.run(init_db())"
-
-    echo "  Restoring from: $(basename "$RESTORE_FILE")..."
-    "$VENV/bin/python3" restore_db.py "$RESTORE_FILE"
-    echo ""
-    # ──────────────────────────────────────────────────────────────────────
+    select_data_file "2/4"
+    restore_data
 
     # Install frontend dependencies only when needed
     echo "==> [3/4] Checking frontend dependencies..."
@@ -156,20 +164,40 @@ case "$MODE" in
 
   # ─── PRODUCTION ───────────────────────────────────────────────────────────
   prod)
+    export SECRET_KEY="$PROD_SECRET_KEY"
+    export ALLOWED_ORIGINS="$PROD_ALLOWED_ORIGINS"
+    export REACT_APP_BACKEND_URL="$PROD_REACT_APP_BACKEND_URL"
+
     echo "==> [prod] Building and starting production stack..."
+
+    select_data_file "1/2"
 
     cd "$ROOT_DIR"
     docker compose down --remove-orphans
     docker compose up --build -d
 
-    echo ""
-    echo "  App   : http://localhost:3001"
+    # Wait for PostgreSQL to be ready before restoring
+    echo "  Waiting for PostgreSQL to be ready..."
+    for i in {1..15}; do
+      if docker compose exec -T postgres \
+          pg_isready -U strongair -d strongair_db > /dev/null 2>&1; then
+        echo "  PostgreSQL is ready."
+        break
+      fi
+      echo "  Still waiting... ($i/15)"
+      sleep 1
+    done
+
+    restore_data
+
+    echo "  App   : https://strongair.nz"
     echo "  Stack : postgres, backend, frontend, nginx"
     echo ""
     echo "Logs: docker compose logs -f"
     ;;
 
   *)
-    usage
+    echo "Usage: $0 [dev|prod]"
+    exit 1
     ;;
 esac
