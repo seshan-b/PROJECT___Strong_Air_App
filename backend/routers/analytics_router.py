@@ -5,28 +5,29 @@
 # Endpoint summary:
 #   GET /api/analytics/hours-by-user   — Total hours per worker (bar chart)
 #   GET /api/analytics/hours-by-job    — Total hours per job (bar chart)
-#   GET /api/analytics/hours-over-time — Total hours per day (line chart)
+#   GET /api/analytics/hours-over-time — Total hours per month (line chart)
 #   GET /api/analytics/summary         — Counts for the five stat cards on the dashboard
 #
 # All endpoints accept optional start_date / end_date query params (YYYY-MM-DD format).
 # Only completed sessions (clock_out is not null) are counted — active sessions are excluded.
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, cast, Date
+from sqlalchemy import select, func, literal_column
 from database import get_db
 from models import ClockSession, User, Job, UserRole
 from schemas import HoursByUserResponse, HoursByJobResponse, HoursOverTimeResponse
 from auth import require_role
 from typing import List, Optional
+from datetime import date
 
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
 
 @router.get("/hours-by-user", response_model=List[HoursByUserResponse])
 async def hours_by_user(
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
@@ -58,8 +59,8 @@ async def hours_by_user(
 
 @router.get("/hours-by-job", response_model=List[HoursByJobResponse])
 async def hours_by_job(
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
@@ -91,14 +92,17 @@ async def hours_by_job(
 
 @router.get("/hours-over-time", response_model=List[HoursOverTimeResponse])
 async def hours_over_time(
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
+    # literal_column emits raw SQL (no bind parameter), so the SELECT and
+    # GROUP BY expressions are identical text and PostgreSQL accepts the query.
+    month_expr = literal_column("to_char(clock_sessions.clock_in, 'YYYY-MM')")
     query = (
         select(
-            cast(ClockSession.clock_in, Date).label("date"),
+            month_expr.label("date"),
             func.coalesce(func.sum(ClockSession.duration_minutes), 0).label("total_minutes"),
         )
         .where(ClockSession.clock_out.isnot(None))
@@ -107,12 +111,12 @@ async def hours_over_time(
         query = query.where(ClockSession.clock_in >= start_date)
     if end_date:
         query = query.where(ClockSession.clock_in <= end_date)
-    query = query.group_by(cast(ClockSession.clock_in, Date)).order_by(cast(ClockSession.clock_in, Date))
+    query = query.group_by(month_expr).order_by(month_expr)
     result = await db.execute(query)
 
     return [
         HoursOverTimeResponse(
-            date=str(row.date),
+            date=row.date,
             total_hours=round(row.total_minutes / 60, 2),
         )
         for row in result.all()
@@ -121,13 +125,18 @@ async def hours_over_time(
 
 @router.get("/summary")
 async def dashboard_summary(
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role(UserRole.superadmin)),
 ):
-    # Total hours
-    total_result = await db.execute(
-        select(func.coalesce(func.sum(ClockSession.duration_minutes), 0)).where(ClockSession.clock_out.isnot(None))
-    )
+    # Total hours (respects date filter)
+    hours_query = select(func.coalesce(func.sum(ClockSession.duration_minutes), 0)).where(ClockSession.clock_out.isnot(None))
+    if start_date:
+        hours_query = hours_query.where(ClockSession.clock_in >= start_date)
+    if end_date:
+        hours_query = hours_query.where(ClockSession.clock_in <= end_date)
+    total_result = await db.execute(hours_query)
     total_minutes = total_result.scalar() or 0
 
     # Total users
