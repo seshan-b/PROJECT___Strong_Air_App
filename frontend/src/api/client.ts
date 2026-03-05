@@ -136,7 +136,8 @@ export const messagesApi = {
 
 // Analytics
 export const analyticsApi = {
-  summary: () => api.get<DashboardSummary>('/api/analytics/summary'),
+  summary: (params?: { start_date?: string; end_date?: string }) =>
+    api.get<DashboardSummary>('/api/analytics/summary', { params }),
   hoursByUser: (params?: { start_date?: string; end_date?: string }) =>
     api.get<HoursByUser[]>('/api/analytics/hours-by-user', { params }),
   hoursByJob: (params?: { start_date?: string; end_date?: string }) =>
