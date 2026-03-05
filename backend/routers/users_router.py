@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database import get_db
-from models import User, UserRole, UserStatus, ClockSession, JobAssignment
+from models import User, UserRole, UserStatus, ClockSession, JobAssignment, MessageThread
 from sqlalchemy import delete
 from schemas import UserResponse, UserUpdateRequest, ApproveUserRequest, ChangeRoleRequest
 from auth import get_current_user, require_role, require_verified, hash_password
@@ -162,6 +162,10 @@ async def delete_user(
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    await db.delete(user)
+    # MessageThread.created_by has no ON DELETE CASCADE, so delete the user's
+    # threads first (DB cascade handles their child messages/recipients).
+    await db.execute(delete(MessageThread).where(MessageThread.created_by == user_id))
+    # All other FK references to users have ON DELETE CASCADE at the DB level.
+    await db.execute(delete(User).where(User.id == user_id))
     await db.commit()
     return {"detail": "User deleted"}

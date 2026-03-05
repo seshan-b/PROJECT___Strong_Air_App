@@ -7,7 +7,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo ""
 echo "  Strong Air — Refresh Script"
 echo "  ───────────────────────────"
-echo "  1) Development  (clean venv + fresh start)"
+echo "  1) Development  (clean venv)"
 echo "  2) Production   (clean venv + Docker rebuild)"
 echo ""
 
@@ -28,10 +28,13 @@ fi
 echo ""
 echo "==> Cleaning up..."
 
-# Remove venv so dependencies are reinstalled fresh
+# Remove venv so dependencies are reinstalled fresh on next start
 if [ -d "$ROOT_DIR/venv" ]; then
   echo "    Removing Python virtual environment..."
   rm -rf "$ROOT_DIR/venv"
+  echo "    Done."
+else
+  echo "    No venv found, skipping."
 fi
 
 if [ "$MODE" = "prod" ]; then
@@ -44,7 +47,5 @@ if [ "$MODE" = "prod" ]; then
 fi
 
 echo ""
-echo "==> Clean complete. Handing off to start.sh..."
+echo "==> Refresh complete. Run ./start.sh to start the server."
 echo ""
-
-exec "$ROOT_DIR/start.sh" "$MODE"

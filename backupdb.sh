@@ -38,8 +38,16 @@ echo "  ────────────────────────
 echo "  Creating: data_backup-${PADDED}.json"
 echo ""
 
+VENV="$ROOT_DIR/venv"
+PYTHON="${VENV}/bin/python3"
+if [ ! -f "$PYTHON" ]; then
+  echo "  venv not found — creating and installing dependencies..."
+  python3 -m venv "$VENV"
+  "$VENV/bin/pip" install -q asyncpg python-dotenv
+fi
+
 cd "$ROOT_DIR/backend"
-python3 backup_db.py "$OUTPUT"
+"$PYTHON" backup_db.py "$OUTPUT"
 
 echo ""
 echo "  Saved to: frontend/src/data/data_backup-${PADDED}.json"
