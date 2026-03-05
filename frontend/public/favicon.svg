@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Orange rounded background -->
+  <rect width="64" height="64" rx="14" fill="#f97316"/>
+
+  <!-- Hard hat: dome (cubic bezier arc) + brim -->
+  <path d="M 14 40 C 14 4 50 4 50 40 Z" fill="white"/>
+  <rect x="7" y="38" width="50" height="8" rx="3" fill="white"/>
+</svg>
