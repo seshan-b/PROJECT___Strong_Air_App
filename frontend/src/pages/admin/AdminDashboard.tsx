@@ -14,7 +14,10 @@
 // to keep the chart and card rendering code clean and readable.
 
 import React, { useCallback, useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { analyticsApi } from '../../api/client';
+import { dateToApi } from '../../utils/date';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Users, Briefcase, Clock, UserPlus, Activity } from 'lucide-react';
 import type { DashboardSummary, HoursByUser, HoursByJob, HoursOverTime } from '../../types';
@@ -48,16 +51,17 @@ const AdminDashboard: React.FC = () => {
   const [hoursByUser, setHoursByUser] = useState<HoursByUser[]>([]);
   const [hoursByJob, setHoursByJob] = useState<HoursByJob[]>([]);
   const [hoursOverTime, setHoursOverTime] = useState<HoursOverTime[]>([]);
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
       const params = {
-        start_date: dateRange.start || undefined,
-        end_date: dateRange.end || undefined,
+        start_date: startDate ? dateToApi(startDate) : undefined,
+        end_date: endDate ? dateToApi(endDate) : undefined,
       };
       const [summaryRes, userRes, jobRes, timeRes] = await Promise.all([
-        analyticsApi.summary(),
+        analyticsApi.summary(params),
         analyticsApi.hoursByUser(params),
         analyticsApi.hoursByJob(params),
         analyticsApi.hoursOverTime(params),
@@ -69,7 +73,7 @@ const AdminDashboard: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch analytics:', err);
     }
-  }, [dateRange]);
+  }, [startDate, endDate]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -81,20 +85,31 @@ const AdminDashboard: React.FC = () => {
           <p className="text-primary-500 text-sm mt-1">Workforce overview and analytics</p>
         </div>
         <div className="flex items-center gap-3">
-          <input
+          <DatePicker
             data-testid="date-start-filter"
-            type="date"
-            value={dateRange.start}
-            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-            className="h-9 px-3 rounded-md border border-primary-200 text-sm text-primary-700 focus:outline-none focus:ring-2 focus:ring-accent"
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+            selectsStart
+            startDate={startDate}
+            endDate={endDate}
+            maxDate={endDate ?? undefined}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="DD/MM/YYYY"
+            isClearable
+            className="h-10 px-3 rounded-md border border-primary-200 text-sm text-primary-700 focus:outline-none focus:ring-2 focus:ring-accent w-32"
           />
-          <span className="text-primary-400 text-sm">to</span>
-          <input
+          <DatePicker
             data-testid="date-end-filter"
-            type="date"
-            value={dateRange.end}
-            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-            className="h-9 px-3 rounded-md border border-primary-200 text-sm text-primary-700 focus:outline-none focus:ring-2 focus:ring-accent"
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+            selectsEnd
+            startDate={startDate}
+            endDate={endDate}
+            minDate={startDate ?? undefined}
+            dateFormat="dd/MM/yyyy"
+            placeholderText="DD/MM/YYYY"
+            isClearable
+            className="h-10 px-3 rounded-md border border-primary-200 text-sm text-primary-700 focus:outline-none focus:ring-2 focus:ring-accent w-32"
           />
         </div>
       </div>
@@ -154,7 +169,15 @@ const AdminDashboard: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={hoursOverTime} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#64748B' }} />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 12, fill: '#64748B' }}
+                tickFormatter={(val: string) => {
+                  const [year, month] = val.split('-');
+                  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                  return `${months[parseInt(month) - 1]}-${year}`;
+                }}
+              />
               <YAxis tick={{ fontSize: 12, fill: '#64748B' }} />
               <Tooltip content={<CustomTooltip />} />
               <Line type="monotone" dataKey="total_hours" stroke="#F97316" strokeWidth={2.5} dot={{ fill: '#F97316', r: 4 }} activeDot={{ r: 6 }} />
