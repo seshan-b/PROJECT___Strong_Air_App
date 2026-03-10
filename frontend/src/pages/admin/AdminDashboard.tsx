@@ -116,7 +116,7 @@ const AdminDashboard: React.FC = () => {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        <StatCard testId="stat-total-hours" icon={<Clock size={18} className="text-accent" />} label="Total Hours" value={summary?.total_hours?.toFixed(1) || '0'} accent />
+        <StatCard testId="stat-total-hours" icon={<Clock size={18} className="text-white" />} label="Total Hours" value={summary?.total_hours?.toFixed(1) || '0'} accent />
         <StatCard testId="stat-total-users" icon={<Users size={18} className="text-primary-500" />} label="Total Users" value={summary?.total_users || 0} />
         <StatCard testId="stat-pending-users" icon={<UserPlus size={18} className="text-primary-500" />} label="Pending Approval" value={summary?.pending_users || 0} />
         <StatCard testId="stat-active-jobs" icon={<Briefcase size={18} className="text-primary-500" />} label="Active Jobs" value={summary?.active_jobs || 0} />
