@@ -3,7 +3,7 @@ import sys
 from datetime import datetime
 
 class StrongAirAPITester:
-    def __init__(self, base_url="https://d6e3a11d-dada-4bbc-b9ef-35ee4225014e.preview.emergentagent.com"):
+    def __init__(self, base_url="http://localhost:8001"):
         self.base_url = base_url
         self.admin_token = None
         self.worker_token = None
